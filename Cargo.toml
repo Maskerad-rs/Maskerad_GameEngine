@@ -1,0 +1,11 @@
+[package]
+name = "kindred_engine"
+version = "0.1.0"
+authors = ["Malkaviel - Maxime Capuano <maxime.capuano2@gmail.com>"]
+publish = false #don't publish it for the moment
+description = "Experimental game engine"
+license = "GPL-3.0+"
+repository = "https://github.com/Malkaviel/KindredEngine.git"
+
+[dependencies]
+
