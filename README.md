@@ -1,4 +1,8 @@
-[![Build Status](https://travis-ci.org/Malkaviel/KindredEngine.svg?branch=master)](https://travis-ci.org/Malkaviel/KindredEngine)  [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0) [![codecov](https://codecov.io/gh/Malkaviel/KindredEngine/branch/master/graph/badge.svg)](https://codecov.io/gh/Malkaviel/KindredEngine)
+[![Build Status](https://travis-ci.org/Malkaviel/KindredEngine.svg?branch=master)](https://travis-ci.org/Malkaviel/KindredEngine)
+[![Build status](https://ci.appveyor.com/api/projects/status/4dowa31sf4mgmgrb/branch/master?svg=true)](https://ci.appveyor.com/project/Malkaviel/kindredengine/branch/master)
+[![codecov](https://codecov.io/gh/Malkaviel/KindredEngine/branch/master/graph/badge.svg)](https://codecov.io/gh/Malkaviel/KindredEngine)
+[![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 
 # WARNING
 This is a personal project for learning game engine architecture, game engine implementation, and Rust.
