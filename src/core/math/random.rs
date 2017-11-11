@@ -23,21 +23,21 @@ impl RandomNumber {
         }
     }
 
-    //Reseed the Xorshift generator
-    pub fn reseed(&mut self, seed: [u32; 4]) {
-        self.generator = XorShiftRng::from_seed(seed);
-    }
-
     pub fn gen_range<T: PartialOrd + SampleRange>(&mut self, low: T, high: T) -> T {
         self.generator.gen_range(low, high)
     }
 
-    pub fn gen<T: Rand>(&mut self) -> T {
-        self.generator.gen()
+    pub fn gen_range_100_int(&mut self) -> u32 {
+        self.generator.gen_range::<u32>(0 ,101)
     }
 
-    pub fn fill_bytes(&mut self, dest: &mut [u8]) {
-        self.generator.fill_bytes(dest);
+    pub fn gen_range_100_float(&mut self) -> f32 {
+        let value = self.generator.gen_range::<f32>(0.0, 100.1);
+        if value > 100.0 {100.0} else {value}
+    }
+
+    pub fn gen<T: Rand>(&mut self) -> T {
+        self.generator.gen()
     }
 }
 
@@ -47,5 +47,71 @@ impl RandomNumber {
 mod tests {
     use super::*;
 
+    #[test]
+    fn xorshift_gen() {
+        let mut rng = RandomNumber::new();
+        let value_u32 = rng.gen::<u32>();
+        let value_u64 = rng.gen::<u64>();
+        let value_i32 = rng.gen::<i32>();
+        let value_i64 = rng.gen::<i64>();
+        let value_f32 = rng.gen::<f32>();
+        let value_f64 = rng.gen::<f64>();
 
+        assert!(value_f32 >= 0.0 && value_f32 < 1.0);
+        assert!(value_f64 >= 0.0 && value_f64 < 1.0);
+
+        //Rand for integers : Uniformly distributed over all values of the type.
+        //Rand for floats : in range [0; 1)
+        for _ in 0..1000 {
+            let temp_value_u32 = rng.gen::<u32>();
+            assert_ne!(value_u32, temp_value_u32);
+
+            let temp_value_u64 = rng.gen::<u64>();
+            assert_ne!(value_u64, temp_value_u64);
+
+            let temp_value_i32 = rng.gen::<i32>();
+            assert_ne!(value_i32, temp_value_i32);
+
+            let temp_value_i64 = rng.gen::<i64>();
+            assert_ne!(value_i64, temp_value_i64);
+
+            let temp_value_f32 = rng.gen::<f32>();
+            assert!(temp_value_f32 >= 0.0 && temp_value_f32 < 1.0);
+            assert_ne!(value_f32, temp_value_f32);
+
+            let temp_value_f64 = rng.gen::<f64>();
+            assert!(temp_value_f64 >= 0.0 && temp_value_f64 < 1.0);
+            assert_ne!(value_f64, temp_value_f64);
+        }
+    }
+
+    #[test]
+    fn xorshift_gen_range() {
+        let mut rng = RandomNumber::new();
+        //gen range generates a value in the range [low, high)
+
+        let value_u32 = rng.gen_range_100_int();
+        assert!(value_u32 >= 0 && value_u32 <= 100);
+        let value_i32 = rng.gen_range::<i32>(-100, 101);
+        assert!(value_i32 >= -100 && value_i32 <= 100);
+        let value_i64 = rng.gen_range::<i64>(-1000, 1001);
+        assert!(value_i64 >= -1000 && value_i64 <= 1000);
+        let value_f32 = rng.gen_range_100_float();
+        assert!(value_f32 >= 0.0 && value_f32 <= 100.0);
+        let value_f64 = rng.gen_range::<f64>(-100.0, 100.0);
+        assert!(value_f64 >= -100.0 && value_f64 <= 100.0);
+
+        for _ in 0..100 {
+            let temp_value_u32 = rng.gen_range_100_int();
+            assert!(temp_value_u32 >= 0 && temp_value_u32 <= 100);
+            let temp_value_i32 = rng.gen_range::<i32>(-100, 101);
+            assert!(temp_value_i32 >= -100 && temp_value_i32 <= 100);
+            let temp_value_i64 = rng.gen_range::<i64>(-1000, 1001);
+            assert!(temp_value_i64 >= -1000 && temp_value_i64 <= 1000);
+            let temp_value_f32 = rng.gen_range_100_float();
+            assert!(temp_value_f32 >= 0.0 && temp_value_f32 <= 100.0);
+            let temp_value_f64 = rng.gen_range::<f64>(-100.0, 100.0);
+            assert!(temp_value_f64 >= -100.0 && temp_value_f64 <= 100.0);
+        }
+    }
 }
