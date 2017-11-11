@@ -4,7 +4,7 @@
 //(https://en.wikipedia.org/wiki/George_Marsaglia)
 //(https://en.wikipedia.org/wiki/Xorshift)
 //(https://en.wikipedia.org/wiki/Mersenne_Twister)
-use rand::{thread_rng, XorShiftRng, Rand, Generator};
+use rand::{thread_rng, XorShiftRng, Rand, Rng, SeedableRng};
 use rand::distributions::range::SampleRange;
 
 //A wrapper of a Xorshift random number generator.
@@ -38,10 +38,6 @@ impl RandomNumber {
 
     pub fn fill_bytes(&mut self, dest: &mut [u8]) {
         self.generator.fill_bytes(dest);
-    }
-
-    pub fn gen_iter<'a, T: Rand>(&'a mut self) -> Generator<'a, T, Self> {
-        self.generator.gen_iter()
     }
 }
 
