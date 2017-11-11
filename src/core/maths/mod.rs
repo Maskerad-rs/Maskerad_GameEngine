@@ -22,4 +22,3 @@ pub mod euler_angle;
 pub mod ortho;
 pub mod perspective;
 pub mod perspective_fov;
-pub mod random;

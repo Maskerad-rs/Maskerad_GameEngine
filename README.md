@@ -2,7 +2,7 @@
 # Kindred game engine
 Experimental game engine written in Rust, far from being usable at this time.
 
-###Math library :
+### Math library :
 The engine uses the 'cgmath' crate, which provides the fundamental tools for computer graphics (Vectors, Matrices, Quaternions...).
 cgmath uses the simd crate to take advantage of SIMD instructions for calculations.
 It also uses Serde, a popular serialization/deserialization library.

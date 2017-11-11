@@ -1,9 +1,8 @@
 extern crate cgmath;
 extern crate rand;
 pub mod core;
-pub mod system;
+pub mod systems;
 pub mod gameplay;
-pub mod context;
 pub mod kindred_engine;
 
 
