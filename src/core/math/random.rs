@@ -91,7 +91,7 @@ mod tests {
         //gen range generates a value in the range [low, high)
 
         let value_u32 = rng.gen_range_100_int();
-        assert!(value_u32 >= 0 && value_u32 <= 100);
+        assert!(value_u32 <= 100);
         let value_i32 = rng.gen_range::<i32>(-100, 101);
         assert!(value_i32 >= -100 && value_i32 <= 100);
         let value_i64 = rng.gen_range::<i64>(-1000, 1001);
@@ -103,7 +103,7 @@ mod tests {
 
         for _ in 0..100 {
             let temp_value_u32 = rng.gen_range_100_int();
-            assert!(temp_value_u32 >= 0 && temp_value_u32 <= 100);
+            assert!(temp_value_u32 <= 100);
             let temp_value_i32 = rng.gen_range::<i32>(-100, 101);
             assert!(temp_value_i32 >= -100 && temp_value_i32 <= 100);
             let temp_value_i64 = rng.gen_range::<i64>(-1000, 1001);

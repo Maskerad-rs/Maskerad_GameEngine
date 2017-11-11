@@ -1,6 +1,11 @@
 extern crate cgmath;
 extern crate rand;
 pub mod core;
+pub mod system;
+pub mod gameplay;
+pub mod context;
+pub mod kindred_engine;
+
 
 //In math :
 //TODO: Line ?
@@ -10,13 +15,3 @@ pub mod core;
 //TODO: Planes (containing a a point P and a unit vector normal to the plane) ?
 //TODO: Axis Aligned bounding box (contaigning 2 Points Pmin and Pmax) (aligned with the world space) ?
 //TODO: Oriented bounding box (contaigning 2 Points Pmin and Pmax) (aligneted with the object space of the object it is bound to) ?
-//TODO: Random number generator (using the 'rand' crate with the Xorshift (very fast, but not the best randomness) number generator ?)
-
-#[cfg(test)]
-mod tests {
-
-    #[test]
-    fn it_works() {
-        assert_eq!(2 + 2, 4);
-    }
-}
