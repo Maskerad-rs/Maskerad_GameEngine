@@ -9,3 +9,4 @@ repository = "https://github.com/Malkaviel/KindredEngine.git"
 
 [dependencies]
 cgmath = "0.15.0"
+rand = "0.3"
