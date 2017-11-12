@@ -3,7 +3,7 @@ extern crate rand;
 pub mod core;
 pub mod systems;
 pub mod gameplay;
-pub mod kindred_engine;
+pub mod game;
 
 
 //In math :
