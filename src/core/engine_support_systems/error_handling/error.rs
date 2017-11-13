@@ -15,7 +15,7 @@ use std::io::Error as FileError;
 #[derive(Debug)]
 pub enum GameError {
     LogError(String, Option<FileError>),
-    FileSystemError(String, FileError),
+    FileSystemError(String, Option<FileError>),
 }
 
 impl Display for GameError {
@@ -44,10 +44,11 @@ impl Error for GameError {
                 }
             },
             &GameError::FileSystemError(ref description, ref file_error) => {
-                Some(&file_error)
+                match file_error {
+                    &Some(error) => Some(&error),
+                    &None => None,
+                }
             },
-
-
         }
     }
 }

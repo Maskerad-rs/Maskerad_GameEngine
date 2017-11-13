@@ -1,5 +1,5 @@
 use std::fs;
-use std::path::{PathBuf, Path};
+use std::path::{PathBuf, Path, Component};
 use std::io::{Read, Seek, Write};
 use std::fmt;
 
@@ -132,7 +132,24 @@ pub trait VFilesystem : VSystem {
     fn to_path_buf(&self) -> Option<PathBuf>;
     //Takes an absolute path and returns either a sanitized relative version of it, or None
     //if there's something bad in it
-    fn sanitize_path(&path: &Path) -> Option<PathBuf> {
+    fn sanitize_path(&self, path: &Path) -> Option<PathBuf> {
+        let mut path_components = path.components();
+        if let None = path_components.next() {
+            return None;
+        }
 
+        let mut sanitized_path = PathBuf::new();
+        for component in path_components {
+            match component {
+                Component::Normal(s) => {
+                    sanitized_path.push(s.to_str());
+                },
+                None => {
+                    return None;
+                },
+            }
+        }
+
+        Some(sanitized_path)
     }
 }

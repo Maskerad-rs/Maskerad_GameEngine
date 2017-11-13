@@ -17,18 +17,36 @@ pub enum SystemType {
 impl Display for SystemType {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            &SystemType::Audio => write!(f, "Audio system"),
-            &SystemType::Log => write!(f, "Log system"),
-            &SystemType::Rendering => write!(f, "Rendering system"),
-            &SystemType::Resource => write!(f, "Resource system"),
-            &SystemType::Input => write!(f, "Input system"),
-            &SystemType::Physic => write!(f, "Physic system"),
+            &SystemType::Audio => {
+                write!(f, "Audio system")
+            },
+            &SystemType::Log => {
+                write!(f, "Log system")
+            },
+            &SystemType::Rendering => {
+                write!(f, "Rendering system")
+            },
+            &SystemType::Resource => {
+                write!(f, "Resource system")
+            },
+            &SystemType::Input => {
+                write!(f, "Input system")
+            },
+            &SystemType::Physic => {
+                write!(f, "Physic system")
+            },
+            &SystemType::Filesystem => {
+                write!(f, "File system")
+            }
         }
     }
 }
 
+pub trait VSystemBuilder : fmt::Debug {
+    fn start_up(&self) -> GameResult<Box<VSystem>>;
+}
+
 pub trait VSystem : fmt::Debug {
-    fn start_up(&mut self) -> GameResult<()>;
     fn shut_down(&mut self) -> GameResult<()>;
-    fn system_type() -> SystemType;
+    fn system_type(&self) -> SystemType;
 }
