@@ -108,18 +108,20 @@ pub trait VFilesystem : VSystem {
 
     //Open file at path to read
     fn open(&self, path: &Path) -> GameResult<Box<VFile>> {
-        self.open_with_options(path, OpenOptions::new().read(true))
+        self.open_with_options(path, OpenOptions::new().set_read(true))
     }
     //Open file at path for writing, truncates if file already exist
     fn create(&self, path: &Path) -> GameResult<Box<VFile>> {
-        self.open_with_options(path, OpenOptions::new().create(true).write(true).truncate(true))
+        self.open_with_options(path, OpenOptions::new().set_create(true).set_write(true).set_truncate(true))
     }
     //Open the file at path for appending, creating it if necessary
     fn append(&self, path: &Path) -> GameResult<Box<VFile>> {
-        self.open_with_options(path, OpenOptions::new().create(true).append(true).write(true))
+        self.open_with_options(path, OpenOptions::new().set_create(true).set_append(true).set_write(true))
     }
     //create directory at path
     fn mkdir(&self, path: &Path) -> GameResult<()>;
+    //remove a file
+    fn rm(&self, path: &Path) -> GameResult<()>;
     //remove file or directory and all its contents
     fn rmrf(&self, path: &Path) -> GameResult<()>;
     //Check if file exists
@@ -134,19 +136,24 @@ pub trait VFilesystem : VSystem {
     //if there's something bad in it
     fn sanitize_path(&self, path: &Path) -> Option<PathBuf> {
         let mut path_components = path.components();
-        if let None = path_components.next() {
-            return None;
+        match path_components.next() {
+            Some(Component::RootDir) => (),
+            _ => return None,
+        }
+
+        fn is_normal_component(comp: Component) -> Option<&str> {
+            match comp {
+                Component::Normal(s) => s.to_str(),
+                _ => None,
+            }
         }
 
         let mut sanitized_path = PathBuf::new();
         for component in path_components {
-            match component {
-                Component::Normal(s) => {
-                    sanitized_path.push(s.to_str());
-                },
-                None => {
-                    return None;
-                },
+            if let Some(s) = is_normal_component(component) {
+                sanitized_path.push(s)
+            } else {
+                return None;
             }
         }
 

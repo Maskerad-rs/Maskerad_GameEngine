@@ -14,15 +14,17 @@ use std::io::Error as FileError;
 //for example, if LogError can have multiple cause of failure, create the enum LogErrorType.
 #[derive(Debug)]
 pub enum GameError {
-    LogError(String, Option<FileError>),
-    FileSystemError(String, Option<FileError>),
+    LogError(FileError),
+    FileSystemError(String),
+    UnknownError(String),
 }
 
 impl Display for GameError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            &GameError::LogError(ref description, ref file_error) => write!(f, "Log error: {}", description),
+            &GameError::LogError(ref file_error) => write!(f, "Log error: {:?}", self),
             &GameError::FileSystemError(ref description) => write!(f, "File system error: {}", description),
+            &GameError::UnknownError(ref description) => write!(f, "Unknown error: {}", description),
 
         }
     }
@@ -31,26 +33,38 @@ impl Display for GameError {
 impl Error for GameError {
     fn description(&self) -> &str {
         match self {
-            &GameError::LogError(_, _) => "LogError",
-            &GameError::FileSystemError(_, _) => "FileSystemError",
+            &GameError::LogError(_) => "LogError",
+            &GameError::FileSystemError(_) => "FileSystemError",
+            &GameError::UnknownError(_) => "UnknownError",
+
         }
     }
     fn cause(&self) -> Option<&Error> {
         match self {
-            &GameError::LogError(ref description, ref file_error) => {
-                match file_error {
-                    &Some(error) => Some(&error),
-                    &None => None,
-                }
+            &GameError::LogError(ref file_error) => {
+                Some(file_error)
             },
-            &GameError::FileSystemError(ref description, ref file_error) => {
-                match file_error {
-                    &Some(error) => Some(&error),
-                    &None => None,
-                }
+            &GameError::FileSystemError(ref description) => {
+                None
             },
+            &GameError::UnknownError(ref description) => {
+                None
+            },
+
         }
     }
 }
 
 pub type GameResult<T> = Result<T, GameError>;
+
+impl From<String> for GameError {
+    fn from(s: String) -> GameError {
+        GameError::UnknownError(s)
+    }
+}
+
+impl From<FileError> for GameError {
+    fn from(s: FileError) -> GameError {
+        GameError::LogError(s)
+    }
+}
