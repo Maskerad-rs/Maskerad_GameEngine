@@ -2,9 +2,12 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::fmt;
 
-use core::engine_support_systems::system_management::filesystems::{VFilesystem, VMetadata, VFile, OpenOptions};
+use core::engine_support_systems::system_management::systems::filesystems::{VFilesystem, VMetadata, VFile, OpenOptions};
 use core::engine_support_systems::system_management::system_types::{VSystem, SystemType, VSystemBuilder};
 use core::engine_support_systems::error_handling::error::{GameResult, GameError};
+use core::engine_support_systems::system_management::system_builders::filesystem_builders::VFilesystemBuilder;
+
+use core::engine_support_systems::data_structures::system_context::{SystemContext};
 
 //The Filesystem must:
 //- Give access to files
@@ -15,6 +18,7 @@ use core::engine_support_systems::error_handling::error::{GameResult, GameError}
 #[derive(Debug)]
 pub struct FilesystemBuilder {
     root: PathBuf,
+    //TODO: Optional directories to create ?
     readonly: bool,
 }
 
@@ -29,7 +33,13 @@ impl FilesystemBuilder {
 }
 
 impl VSystemBuilder for FilesystemBuilder {
-    fn start_up(&self) -> GameResult<Box<VSystem>> {
+    fn system_builder_type(&self) -> SystemType {
+        SystemType::Filesystem
+    }
+}
+
+impl VFilesystemBuilder for FilesystemBuilder {
+    fn start_up(&self, context: &SystemContext) -> GameResult<Box<VFilesystem>> {
         let root = self.root.clone();
         let readonly = self.readonly;
         Ok(Box::new(Filesystem {
@@ -87,7 +97,7 @@ impl VSystem for Filesystem {
         SystemType::Filesystem
     }
 
-    fn shut_down(&mut self) -> GameResult<()> {
+    fn shut_down(&mut self, context: &SystemContext) -> GameResult<()> {
         Ok(())
     }
 }
