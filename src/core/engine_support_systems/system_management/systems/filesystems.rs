@@ -3,8 +3,8 @@ use std::path::{PathBuf, Path, Component};
 use std::io::{Read, Seek, Write};
 use std::fmt;
 
-use core::engine_support_systems::system_management::system_types::{VSystem, SystemType};
-use core::engine_support_systems::error_handling::error::{GameResult, GameError};
+use core::engine_support_systems::system_management::system_types::VSystem;
+use core::engine_support_systems::error_handling::error::GameResult;
 
 pub trait VFile: Read + Seek + Write + fmt::Debug {}
 impl<T: Read + Seek + Write + fmt::Debug> VFile for T {}
@@ -103,6 +103,8 @@ impl OpenOptions {
 //Append to file
 //Access to metadata
 pub trait VFilesystem : VSystem {
+    fn start_up(&self) -> GameResult<Box<VFilesystem>>;
+
     //Open file at path with options
     fn open_with_options(&self, path: &Path, open_options: &OpenOptions) -> GameResult<Box<VFile>>;
 

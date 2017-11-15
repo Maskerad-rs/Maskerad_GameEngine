@@ -1,5 +1,8 @@
 extern crate cgmath;
 extern crate rand;
+#[macro_use]
+extern crate lazy_static;
+
 pub mod core;
 pub mod systems;
 pub mod gameplay;
