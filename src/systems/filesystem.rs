@@ -1,4 +1,4 @@
-/*
+
 
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -8,7 +8,7 @@ use core::engine_support_systems::system_management::systems::filesystems::{VFil
 use core::engine_support_systems::system_management::system_types::{VSystem, SystemType};
 use core::engine_support_systems::error_handling::error::{GameResult, GameError};
 
-use core::engine_support_systems::data_structures::system_context::{SystemContext};
+//use core::engine_support_systems::data_structures::system_context::{SystemContext};
 
 //The Filesystem must:
 //- Give access to files
@@ -161,4 +161,3 @@ impl VFilesystem for Filesystem {
     }
 }
 
-*/
