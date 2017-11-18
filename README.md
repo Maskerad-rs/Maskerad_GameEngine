@@ -19,7 +19,7 @@ The purpose and general architecture is still not defined :
  If you are looking for a promising Rust game engine or game engine resources, just take a look at : 
  http://arewegameyet.com/index.html
 
-# Kindred game engine
+# Chinstrap game engine
 game engine written in Rust.
 
 ### Math library :
