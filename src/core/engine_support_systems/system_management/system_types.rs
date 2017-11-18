@@ -1,8 +1,6 @@
 use std::fmt::Display;
 use std::fmt;
 
-use core::engine_support_systems::error_handling::error::GameResult;
-
 #[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
 pub enum SystemType {
     Audio,
@@ -42,7 +40,3 @@ impl Display for SystemType {
     }
 }
 
-pub trait VSystem : fmt::Debug {
-    fn shut_down(&mut self) -> GameResult<()>;
-    fn system_type(&self) -> SystemType;
-}

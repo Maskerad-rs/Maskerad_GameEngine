@@ -20,24 +20,25 @@ impl Clock {
         }
     }
 
-    pub fn update(&mut self, delta_time: u64) {
+    pub fn update(&mut self, delta_time: f64) {
         if !self.paused {
-            let scaled_time = (delta_time as f64 * self.time_scale) as u64;
-            self.total_time += Duration::from_millis(scaled_time);
+            let scaled_time = (delta_time as f64 * self.time_scale) as f64;
+
+            self.total_time += Duration::from_millis((scaled_time * 1e3) as u64);
         }
     }
 
-    pub fn get_total_time_in_milliseconds(&self) -> u64 {
-        self.total_time.as_secs() as u64 + (self.total_time.subsec_nanos() as f64 * 1e-3) as u64
+    pub fn get_total_time_seconds(&self) -> f64 {
+        self.total_time.as_secs() as f64 + (self.total_time.subsec_nanos() as f64 * 1e-9) as f64
     }
 
     pub fn get_current_time() -> Instant {
         Instant::now()
     }
 
-    pub fn calculate_delta_time_milliseconds(begin_tick: Instant, end_tick: Instant) -> u64 {
+    pub fn calculate_delta_time_seconds(begin_tick: Instant, end_tick: Instant) -> f64 {
         let duration = end_tick.duration_since(begin_tick);
-        duration.as_secs() as u64 + (duration.subsec_nanos() as f64 * 1e-3) as u64
+        duration.as_secs() as f64 + (duration.subsec_nanos() as f64 * 1e-9) as f64
     }
 
     pub fn is_paused(&self) -> bool {
@@ -58,8 +59,8 @@ impl Clock {
 
     pub fn single_step(&mut self) {
         if self.paused {
-            let scaled_time = (16.0 * self.time_scale) as u64;
-            self.total_time += Duration::from_millis(scaled_time);
+            let scaled_time = (0.016 * self.time_scale) as f64;
+            self.total_time += Duration::from_millis((scaled_time * 1e3) as u64);
         }
     }
 }

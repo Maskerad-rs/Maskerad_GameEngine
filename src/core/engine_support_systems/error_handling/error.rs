@@ -17,7 +17,7 @@ pub enum GameError {
     LogError(FileError),
     FileSystemError(String),
     UnknownError(String),
-    ContextError(String),
+    ThreadPoolError(String),
 }
 
 impl Display for GameError {
@@ -26,7 +26,7 @@ impl Display for GameError {
             &GameError::LogError(ref file_error) => write!(f, "Log error: {:?}", self),
             &GameError::FileSystemError(ref description) => write!(f, "File system error: {}", description),
             &GameError::UnknownError(ref description) => write!(f, "Unknown error: {}", description),
-            &GameError::ContextError(ref description) => write!(f, "Context error: {}", description)
+            &GameError::ThreadPoolError(ref description) => write!(f, "ThreadPool error: {}", description)
         }
     }
 }
@@ -37,7 +37,7 @@ impl Error for GameError {
             &GameError::LogError(_) => "LogError",
             &GameError::FileSystemError(_) => "FileSystemError",
             &GameError::UnknownError(_) => "UnknownError",
-            &GameError::ContextError(_) => "ContextError",
+            &GameError::ThreadPoolError(_) => "ThreadPoolError",
 
         }
     }
@@ -52,7 +52,7 @@ impl Error for GameError {
             &GameError::UnknownError(ref description) => {
                 None
             },
-            &GameError::ContextError(ref description) => {
+            &GameError::ThreadPoolError(ref description) => {
                 None
             }
         }

@@ -5,10 +5,9 @@ use std::path::{Path, PathBuf};
 use std::fmt;
 
 use core::engine_support_systems::system_management::systems::filesystems::{VFilesystem, VMetadata, VFile, OpenOptions};
-use core::engine_support_systems::system_management::system_types::{VSystem, SystemType};
 use core::engine_support_systems::error_handling::error::{GameResult, GameError};
 
-//use core::engine_support_systems::data_structures::system_context::{SystemContext};
+use core::engine_support_systems::data_structures::threadpools::filesystem_threadpool::FilesystemThreadPool;
 
 //The Filesystem must:
 //- Give access to files
@@ -33,10 +32,10 @@ impl VMetadata for Metadata {
 
 
 
-
 pub struct Filesystem {
     root: PathBuf,
     readonly: bool,
+    thread_pool: FilesystemThreadPool,
 }
 
 impl fmt::Debug for Filesystem {
@@ -46,6 +45,15 @@ impl fmt::Debug for Filesystem {
 }
 
 impl Filesystem {
+
+    pub fn new(root: &Path, readonly: bool, thread_pool: FilesystemThreadPool) -> Self {
+        Filesystem {
+            root: root.to_path_buf(),
+            readonly,
+            thread_pool,
+        }
+    }
+
     fn get_absolute(&self, path: &Path) -> GameResult<PathBuf> {
         if let Some(safe_path) = self.sanitize_path(path) {
             let mut root_path = self.root.clone();
@@ -57,26 +65,18 @@ impl Filesystem {
     }
 }
 
-
-impl VSystem for Filesystem {
-
-    fn system_type(&self) -> SystemType {
-        SystemType::Filesystem
-    }
-
-    fn shut_down(&mut self) -> GameResult<()> {
-        Ok(())
-    }
-}
-
+//TODO: The API must use the threadpool to operate
 impl VFilesystem for Filesystem {
-    fn start_up(&self) -> GameResult<Box<VFilesystem>> {
-        let root = self.root.clone();
-        let readonly = self.readonly;
-        Ok(Box::new(Filesystem {
-            root,
-            readonly,
-        }))
+    fn get_number_of_thread(&self) -> usize {
+        self.thread_pool.get_number_of_thread()
+    }
+
+    fn get_thread_pool(&self) -> &FilesystemThreadPool {
+        &self.thread_pool
+    }
+
+    fn shut_down(&self) -> GameResult<()> {
+        Ok(())
     }
 
     fn open_with_options(&self, path: &Path, open_options: &OpenOptions) -> GameResult<Box<VFile>> {
@@ -161,3 +161,14 @@ impl VFilesystem for Filesystem {
     }
 }
 
+
+//TODO: test the physical filesystem
+#[cfg(test)]
+mod filesystem_test {
+    use super::*;
+
+    #[test]
+    fn test() {
+
+    }
+}

@@ -1,10 +1,12 @@
+#![feature(fnbox)]
+
 extern crate cgmath;
 extern crate rand;
 
 pub mod core;
 pub mod systems;
 pub mod gameplay;
-pub mod game;
+pub mod game_specific;
 
 
 //In math :
