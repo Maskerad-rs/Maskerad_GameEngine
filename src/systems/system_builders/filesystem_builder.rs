@@ -1,15 +1,21 @@
-use systems::system_implementations::filesystem::Filesystem;
-use core::engine_support_systems::data_structures::threadpools::filesystem_threadpool::FilesystemThreadPool;
-use core::engine_support_systems::error_handling::error::{GameResult, GameError};
+use core::engine_support_systems::system_management::systems::filesystems::VFilesystem;
+
+use systems::system_implementations::platforms::linux::filesystem::Filesystem;
+use systems::system_implementations::platforms::PlatformType;
 
 use std::path::{Path, PathBuf};
+use std::sync::Arc;
+//TODO: Maybe Mutex ?
+//There's a multitude of implementations, according to the target platform.
 
 
-
+//TODO: BUILDERS SHOULD READ CONFIG FILES
+//TODO: Consume should return a GameResult, if an option hasn't been modified to a Some() (mean config file not complete)
 pub struct FileSystemBuilder {
     number_of_thread: Option<usize>,
     root: Option<PathBuf>,
     read_only: Option<bool>,
+    platform: Option<PlatformType>,
 }
 
 impl FileSystemBuilder {
@@ -18,7 +24,13 @@ impl FileSystemBuilder {
             number_of_thread: None,
             root: None,
             read_only: None,
+            platform: None,
         }
+    }
+
+    pub fn for_the_platform(mut self, platform: PlatformType) -> Self {
+        self.platform = Some(platform);
+        self
     }
 
     pub fn with_number_of_thread(mut self, size: usize) -> Self {
@@ -36,7 +48,7 @@ impl FileSystemBuilder {
         self
     }
 
-    pub fn consume(&mut self) -> GameResult<Filesystem> {
+    pub fn consume(&mut self) -> Arc<VFilesystem>  {
         let root = match self.root {
             Some(ref path) => path.clone(),
             None => PathBuf::from("root"),
@@ -52,9 +64,18 @@ impl FileSystemBuilder {
             None => 4,
         };
 
-        let thread_pool = FilesystemThreadPool::new(number_of_thread)?;
-
-        Ok(Filesystem::new(root.as_path(), readonly, thread_pool))
+        match self.platform {
+            Some(platform) => {
+                match platform {
+                    PlatformType::Linux => {
+                        Arc::new(Filesystem::new(root.as_path(), readonly))
+                    },
+                }
+            },
+            None => {
+                Arc::new(Filesystem::new(root.as_path(), readonly))
+            }
+        }
     }
 }
 

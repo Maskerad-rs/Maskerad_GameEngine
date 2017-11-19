@@ -30,6 +30,18 @@ impl Game {
 
         //Create systems builders according to the config read. (platform, number of threads...).
 
+        //create our multithreaded ref counted immutable systems (Arc<OurSystem>)
+
+        //create the singleton system threadpools.
+        //Our objects will send messages to those system threadpools.
+        //Those threadpools will repackages those messages to send
+        //messages to their workers.
+        //Those threadpools, when created, contain a 'reference' to the systems.
+        //When sending a message to their workers, those threadpools will
+        //package the message AND a 'reference' to the system.
+
+
+        //Prepare the gameloop
 
         //preferred delta time
         let mut delta = self.preferred_frame_rate_millisec;

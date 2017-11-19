@@ -6,5 +6,52 @@
 
 //Subsystem trait : start_up(), shut_down() and builder pattern.
 //We can try to use closures to use subsystems in the subsystem_locator.
-pub mod system_types;
 pub mod systems;
+
+
+
+use std::fmt::Display;
+use std::fmt;
+
+#[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
+pub enum SystemType {
+    Audio,
+    Rendering,
+    Physic,
+    Log,
+    Resource,
+    Input,
+    Filesystem,
+}
+
+impl Display for SystemType {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            &SystemType::Audio => {
+                write!(f, "Audio system")
+            },
+            &SystemType::Log => {
+                write!(f, "Log system")
+            },
+            &SystemType::Rendering => {
+                write!(f, "Rendering system")
+            },
+            &SystemType::Resource => {
+                write!(f, "Resource system")
+            },
+            &SystemType::Input => {
+                write!(f, "Input system")
+            },
+            &SystemType::Physic => {
+                write!(f, "Physic system")
+            },
+            &SystemType::Filesystem => {
+                write!(f, "File system")
+            }
+        }
+    }
+}
+
+pub trait System : fmt::Debug {
+    fn system_type(&self) -> SystemType;
+}

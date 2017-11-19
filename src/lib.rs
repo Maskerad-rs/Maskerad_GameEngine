@@ -1,5 +1,3 @@
-#![feature(fnbox)]
-
 extern crate cgmath;
 extern crate rand;
 

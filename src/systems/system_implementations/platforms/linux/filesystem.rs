@@ -6,8 +6,8 @@ use std::fmt;
 
 use core::engine_support_systems::system_management::systems::filesystems::{VFilesystem, VMetadata, VFile, OpenOptions};
 use core::engine_support_systems::error_handling::error::{GameResult, GameError};
-
-use core::engine_support_systems::data_structures::threadpools::filesystem_threadpool::FilesystemThreadPool;
+use core::engine_support_systems::system_management::System;
+use core::engine_support_systems::system_management::SystemType;
 
 //The Filesystem must:
 //- Give access to files
@@ -16,6 +16,7 @@ use core::engine_support_systems::data_structures::threadpools::filesystem_threa
 //logs
 //
 
+//TODO: Partially rewrite the linux filesystem.
 
 pub struct Metadata(fs::Metadata);
 impl VMetadata for Metadata {
@@ -35,7 +36,12 @@ impl VMetadata for Metadata {
 pub struct Filesystem {
     root: PathBuf,
     readonly: bool,
-    thread_pool: FilesystemThreadPool,
+}
+
+impl System for Filesystem {
+    fn system_type(&self) -> SystemType {
+        SystemType::Filesystem
+    }
 }
 
 impl fmt::Debug for Filesystem {
@@ -46,11 +52,10 @@ impl fmt::Debug for Filesystem {
 
 impl Filesystem {
 
-    pub fn new(root: &Path, readonly: bool, thread_pool: FilesystemThreadPool) -> Self {
+    pub fn new(root: &Path, readonly: bool) -> Self {
         Filesystem {
             root: root.to_path_buf(),
             readonly,
-            thread_pool,
         }
     }
 
@@ -65,26 +70,20 @@ impl Filesystem {
     }
 }
 
-//TODO: The API must use the threadpool to operate
 impl VFilesystem for Filesystem {
-    fn get_number_of_thread(&self) -> usize {
-        self.thread_pool.get_number_of_thread()
-    }
-
-    fn get_thread_pool(&self) -> &FilesystemThreadPool {
-        &self.thread_pool
-    }
 
     fn shut_down(&self) -> GameResult<()> {
         Ok(())
     }
 
     fn open_with_options(&self, path: &Path, open_options: &OpenOptions) -> GameResult<Box<VFile>> {
+
         if self.readonly && (open_options.is_write() || open_options.is_create() || open_options.is_append() || open_options.is_truncate()) {
             return Err(GameError::FileSystemError(format!("Cannot alter file {:?} in root {:?}, filesystem read-only", path, self)));
         }
 
         let absolute_path = self.get_absolute(path)?;
+
         open_options.to_fs_openoptions().open(absolute_path).map(|x| {
             Box::new(x) as Box<VFile>
         }).map_err(GameError::from)

@@ -3,9 +3,9 @@ use std::path::{PathBuf, Path, Component};
 use std::io::{Read, Seek, Write};
 use std::fmt;
 
-use core::engine_support_systems::system_management::system_types::SystemType;
+use core::engine_support_systems::system_management::SystemType;
 use core::engine_support_systems::error_handling::error::GameResult;
-use core::engine_support_systems::data_structures::threadpools::filesystem_threadpool::FilesystemThreadPool;
+use core::engine_support_systems::system_management::System;
 
 
 pub trait VFile: Read + Seek + Write + fmt::Debug {}
@@ -104,11 +104,8 @@ impl OpenOptions {
 //Create file if it doesn't exist
 //Append to file
 //Access to metadata
-pub trait VFilesystem : fmt::Debug {
-    // TODO: SHOULD BE IN A SPECIAL TRAIT
-    fn get_thread_pool(&self) -> &FilesystemThreadPool;
-    fn get_number_of_thread(&self) -> usize;
-    //
+pub trait VFilesystem : System {
+
     //TODO: SHOULD BE IN A SPECIAL TRAIT
     fn system_type(&self) -> SystemType {SystemType::Filesystem}
     fn shut_down(&self) -> GameResult<()>;

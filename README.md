@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Malkaviel/KindredEngine.svg?branch=master)](https://travis-ci.org/Malkaviel/KindredEngine)
+[![Build Status](https://travis-ci.org/Malkaviel/Chinstrap_Engine.svg?branch=master)](https://travis-ci.org/Malkaviel/Chinstrap_Engine)
 [![Build status](https://ci.appveyor.com/api/projects/status/4dowa31sf4mgmgrb/branch/master?svg=true)](https://ci.appveyor.com/project/Malkaviel/kindredengine/branch/master)
 [![codecov](https://codecov.io/gh/Malkaviel/KindredEngine/branch/master/graph/badge.svg)](https://codecov.io/gh/Malkaviel/KindredEngine)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
