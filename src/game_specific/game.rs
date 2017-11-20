@@ -90,5 +90,9 @@ impl Game {
             //sleep for (preferred frame rate - delta time). 'Guarantee' a consistent framerate.
             thread::sleep(Duration::from_millis(((self.preferred_frame_rate_millisec - delta) * 1e3) as u64));
         }
+
+        //Out of the game loop, time to quit !
+
+        //shut down every systems in the inverse order of initialization
     }
 }

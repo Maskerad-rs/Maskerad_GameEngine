@@ -172,11 +172,31 @@ impl VFilesystem for Filesystem {
 
 //TODO: test the physical filesystem
 #[cfg(test)]
-mod filesystem_test {
+mod linux_filesystem_test {
     use super::*;
+    use std::io::BufReader;
+    use std::io::Read;
 
     #[test]
-    fn test() {
+    fn filesystem_creation() {
+        let filesystem = Filesystem::new(Path::new("root_test"), false);
+        assert!(!filesystem.readonly);
 
+        let filesystem = Filesystem::new(Path::new("root_test"), true);
+        assert!(filesystem.readonly);
+    }
+
+    #[test]
+    fn filesystem_open_then_write_then_append_then_read() {
+        let filesystem = Filesystem::new(Path::new("root_test"), false);
+        filesystem.create(Path::new("root_test/file_test.txt")).unwrap().write_all(b"text_test").unwrap();
+        filesystem.append(Path::new("root_test/file_test.txt")).unwrap().write_all(b"text_append_test").unwrap();
+        let mut bufreader = BufReader::new(filesystem.open(Path::new("root_test/file_test.txt")).unwrap());
+        let mut content = String::new();
+        bufreader.read_to_string(&mut content);
+
+        assert_eq!(content.lines().next(), Some("text_test"));
+        assert_eq!(content.lines().next(), Some("text_append_test"));
+        assert_eq!(content.lines().next(), None);
     }
 }
