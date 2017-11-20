@@ -1,5 +1,5 @@
-use core::engine_support_systems::data_structures::threadpools::systems::filesystem::filesystem_worker_messages::FilesystemWorkerMessage;
 use core::engine_support_systems::data_structures::threadpools::systems::filesystem::filesystem_threadpool_messages::FilesystemMessage;
+use core::engine_support_systems::system_management::systems::filesystems::VFilesystem;
 
 use std::path::Path;
 use std::io::BufReader;
@@ -12,48 +12,49 @@ use std::sync::Mutex;
 
 pub struct FilesystemWorker {
     id: usize,
-    thread: thread::JoinHandle<()>, //TODO: Maybe JoinHandle<GameResult<()>> ?
+    thread: thread::JoinHandle<()>,
 }
 
 impl FilesystemWorker {
-    pub fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<FilesystemWorkerMessage>>> ) -> Self {
-
+    pub fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<FilesystemMessage>>>, filesystem: Arc<VFilesystem> ) -> Self {
         let thread = thread::spawn(move || {
             loop {
-                let job = receiver.lock().unwrap().recv().unwrap(); //TODO:recv or try_recv ??
+                //We use recv, not try_recv. recv always block the current thread if there's no data available.
+                //However, if i'm not mistaken, recv isn't invoked in the main thread, so there's no big deal.
+                //and try_recv returns an error if the buffer is empty. Definitely not adapted to a thread pool.
+                let job = receiver.lock().unwrap().recv().unwrap();
 
-                match job.0 {
+                match job {
                     FilesystemMessage::RemoveFile(name) => {
-                        job.1.rm(Path::new(name.as_str())).unwrap();
+                        filesystem.rm(Path::new(name.as_str())).unwrap();
                     },
                     FilesystemMessage::RemoveDirectory(name) => {
-                        job.1.rmrf(Path::new(name.as_str())).unwrap();
+                        filesystem.rmrf(Path::new(name.as_str())).unwrap();
                     },
+                    //A worker thread cannot join (he loops forever). However, we can pass Arc<Mutex<Types>> to our messages in order to fill them ?
                     FilesystemMessage::ReadFile(name, string_to_fill) => {
-                        let file = job.1.open(Path::new(name.as_str())).unwrap();
+                        let file = filesystem.open(Path::new(name.as_str())).unwrap();
                         let mut buf_reader = BufReader::new(file);
-                        buf_reader.read_to_string(&mut *string_to_fill.lock().unwrap());
+                        buf_reader.read_to_string(&mut *string_to_fill.lock().unwrap()).unwrap();
                     },
-                    FilesystemMessage::ReadDirectory(name, string_to_fill) => {
-                        //TODO: not sure if it's the right thing to do.
-                        let file_iterator = job.1.read_dir(Path::new(name.as_str())).unwrap();
-                        for file in file_iterator {
-
+                    FilesystemMessage::ReadDirectory(name, vec_to_fill) => {
+                        //TODO: a string to fill ? maybe a vec<PathBuf> right ?
+                        //let file_iterator = filesystem.read_dir(Path::new(name.as_str())).unwrap();
+                        for path in filesystem.read_dir(Path::new(name.as_str())).unwrap() {
+                            vec_to_fill.lock().unwrap().push(path.unwrap());
                         }
                     },
                     FilesystemMessage::CreateDirectory(name) => {
-                        job.1.mkdir(Path::new(name.as_str())).unwrap();
+                        filesystem.mkdir(Path::new(name.as_str())).unwrap();
                     },
                     FilesystemMessage::AppendToFile(name, text) => {
                         //append only open the file in a certain state, you have to write after.
-                        let file = job.1.append(Path::new(name.as_str())).unwrap();
-                        //TODO: write, or write_all ?
+                        let mut file = filesystem.append(Path::new(name.as_str())).unwrap();
                         file.write_all(text.as_bytes()).unwrap();
                     },
                     FilesystemMessage::WriteToFile(name, text) => {
                         //same for create.
-                        let file = job.1.create(Path::new(name.as_str())).unwrap();
-                        //TODO: write, or write_all ?
+                        let mut file = filesystem.create(Path::new(name.as_str())).unwrap();
                         file.write_all(text.as_bytes()).unwrap();
                     }
                 }

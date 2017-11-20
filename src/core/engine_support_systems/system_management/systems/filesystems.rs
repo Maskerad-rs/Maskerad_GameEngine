@@ -3,6 +3,8 @@ use std::path::{PathBuf, Path, Component};
 use std::io::{Read, Seek, Write};
 use std::fmt;
 
+use std::sync::Arc;
+
 use core::engine_support_systems::system_management::SystemType;
 use core::engine_support_systems::error_handling::error::GameResult;
 use core::engine_support_systems::system_management::System;
@@ -107,7 +109,6 @@ impl OpenOptions {
 pub trait VFilesystem : System {
 
     //TODO: SHOULD BE IN A SPECIAL TRAIT
-    fn system_type(&self) -> SystemType {SystemType::Filesystem}
     fn shut_down(&self) -> GameResult<()>;
     //
 
@@ -134,9 +135,13 @@ pub trait VFilesystem : System {
     fn rmrf(&self, path: &Path) -> GameResult<()>;
     //Check if file exists
     fn exists(&self, path: &Path) -> bool;
+
     //Get file's metadata
+    //Arc because FS threadpool asks FS to give him. But workers in others threads.
     fn metadata(&self, path: &Path) -> GameResult<Box<VMetadata>>;
+
     //Retrieve all file and directory entries in the given directory.
+    //Arc because FS threadpool asks FS to give him. But workers in others threads.
     fn read_dir(&self, path: &Path) -> GameResult<Box<Iterator<Item = GameResult<PathBuf>>>>;
     //Retrieve the actual location of the filesystem root, if available
     fn to_path_buf(&self) -> Option<PathBuf>;

@@ -65,9 +65,9 @@ impl FileSystemBuilder {
         };
 
         match self.platform {
-            Some(platform) => {
+            Some(ref platform) => {
                 match platform {
-                    PlatformType::Linux => {
+                    &PlatformType::Linux => {
                         Arc::new(Filesystem::new(root.as_path(), readonly))
                     },
                 }

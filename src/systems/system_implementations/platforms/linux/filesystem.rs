@@ -9,6 +9,8 @@ use core::engine_support_systems::error_handling::error::{GameResult, GameError}
 use core::engine_support_systems::system_management::System;
 use core::engine_support_systems::system_management::SystemType;
 
+use std::sync::Arc;
+
 //The Filesystem must:
 //- Give access to files
 
@@ -17,6 +19,7 @@ use core::engine_support_systems::system_management::SystemType;
 //
 
 //TODO: Partially rewrite the linux filesystem.
+//TODO: stop using unwrap, handle those goddamn errors with our GameResult<>
 
 pub struct Metadata(fs::Metadata);
 impl VMetadata for Metadata {
@@ -137,19 +140,20 @@ impl VFilesystem for Filesystem {
         }).map_err(GameError::from)
     }
 
+    //We return an Arc<Iterator<Item=GameResult<PathBuf>>>, not a box. Our filesystem threadpool, with its workers, ask the filesystem
+    //to return an iterator of GameResult<PathBuf>. However, our workers are in other threads.
+    //Walk a directory, only visiting files
     fn read_dir(&self, path: &Path) -> GameResult<Box<Iterator<Item = GameResult<PathBuf>>>> {
         let absolute_path = self.get_absolute(path)?;
 
-        let direntry_to_path = |entry: &fs::DirEntry| -> GameResult<PathBuf> {
-            let fname = entry.file_name().into_string().unwrap();
-            let mut pathbuf = PathBuf::from(path);
-            pathbuf.push(fname);
-            Ok(pathbuf)
-        };
-
         let itr = fs::read_dir(path)?
-            .map(|entry| direntry_to_path(&entry?))
-            .collect::<Vec<_>>()
+            .map(|entry| {
+                let filename = entry.unwrap().file_name().into_string().unwrap();
+                let mut pathbuf = PathBuf::from(path);
+                pathbuf.push(filename);
+                Ok(pathbuf)
+            })
+            .collect::<Vec<GameResult<PathBuf>>>()
             .into_iter();
 
         Ok(Box::new(itr))

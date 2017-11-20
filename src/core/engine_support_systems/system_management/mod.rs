@@ -52,6 +52,7 @@ impl Display for SystemType {
     }
 }
 
-pub trait System : fmt::Debug {
+//TODO: Send and Sync are unsafe traits, we must be sure our systems, traits and trait objects work as expected.
+pub trait System : fmt::Debug + Send + Sync {
     fn system_type(&self) -> SystemType;
 }

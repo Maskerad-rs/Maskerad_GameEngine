@@ -3,7 +3,6 @@ use core::engine_support_systems::data_structures::ThreadPool;
 use core::engine_support_systems::data_structures::threadpools::systems::filesystem::filesystem_worker::FilesystemWorker;
 use core::engine_support_systems::system_management::systems::filesystems::VFilesystem;
 use core::engine_support_systems::data_structures::threadpools::systems::filesystem::filesystem_threadpool_messages::FilesystemMessage;
-use core::engine_support_systems::data_structures::threadpools::systems::filesystem::filesystem_worker_messages::FilesystemWorkerMessage;
 
 use std::fmt;
 
@@ -13,8 +12,7 @@ use std::sync::Mutex;
 
 pub struct FilesystemThreadPool {
     workers: Vec<FilesystemWorker>,
-    sender: mpsc::Sender<FilesystemWorkerMessage>,
-    filesystem: Arc<VFilesystem>, //TODO: Is this goddamn trait Send ? nope it isn't.
+    sender: mpsc::Sender<FilesystemMessage>,
 }
 
 impl ThreadPool for FilesystemThreadPool {
@@ -31,8 +29,10 @@ impl fmt::Debug for FilesystemThreadPool {
 
 impl FilesystemThreadPool {
 
+    //TODO: A Function join(&self, worker_id: usize) { workers[worker_id].get_thread().join(); } ??
+
     pub fn execute(&self, message: FilesystemMessage) {
-        self.sender.send(FilesystemWorkerMessage(message, self.filesystem.clone())).unwrap();
+        self.sender.send(message).unwrap();
     }
 
     pub fn new(size: usize, filesystem: Arc<VFilesystem>) -> GameResult<FilesystemThreadPool> {
@@ -46,12 +46,12 @@ impl FilesystemThreadPool {
             let mut workers = Vec::with_capacity(size);
 
             for id in 0..size {
-                workers.push(FilesystemWorker::new(id, receiver.clone()));
+                workers.push(FilesystemWorker::new(id, receiver.clone(), filesystem.clone()));
             }
+
             Ok(FilesystemThreadPool {
                 workers,
                 sender,
-                filesystem,
             })
         }
     }

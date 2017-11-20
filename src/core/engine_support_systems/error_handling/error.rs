@@ -23,7 +23,7 @@ pub enum GameError {
 impl Display for GameError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            &GameError::LogError(ref file_error) => write!(f, "Log error: {:?}", self),
+            &GameError::LogError(_) => write!(f, "Log error: {:?}", self),
             &GameError::FileSystemError(ref description) => write!(f, "File system error: {}", description),
             &GameError::UnknownError(ref description) => write!(f, "Unknown error: {}", description),
             &GameError::ThreadPoolError(ref description) => write!(f, "ThreadPool error: {}", description)
@@ -46,13 +46,13 @@ impl Error for GameError {
             &GameError::LogError(ref file_error) => {
                 Some(file_error)
             },
-            &GameError::FileSystemError(ref description) => {
+            &GameError::FileSystemError(_) => {
                 None
             },
-            &GameError::UnknownError(ref description) => {
+            &GameError::UnknownError(_) => {
                 None
             },
-            &GameError::ThreadPoolError(ref description) => {
+            &GameError::ThreadPoolError(_) => {
                 None
             }
         }

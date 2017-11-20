@@ -8,7 +8,6 @@
 //TODO: Planes (containing a a point P and a unit vector normal to the plane) ?
 //TODO: Axis Aligned bounding box (contaigning 2 Points Pmin and Pmax) (aligned with the world space) ?
 //TODO: Oriented bounding box (contaigning 2 Points Pmin and Pmax) (aligneted with the object space of the object it is bound to) ?
-//TODO: Random number generator (using the 'rand' crate with the Xorshift (very fast, but not the best randomness) number generator ?)
 
 pub mod vector;
 pub mod point;
