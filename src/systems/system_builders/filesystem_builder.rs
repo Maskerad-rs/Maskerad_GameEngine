@@ -1,7 +1,7 @@
 use core::engine_support_systems::system_management::systems::filesystems::VFilesystem;
+use core::engine_support_systems::system_management::PlatformType;
 
 use systems::system_implementations::platforms::linux::filesystem::Filesystem;
-use systems::system_implementations::platforms::PlatformType;
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -86,12 +86,14 @@ mod filesystem_builder_test {
     use super::*;
 
     #[test]
-    fn test() {
+    fn filesystem_builder_builds_for_different_platforms() {
         let mut filesystem_builder = FileSystemBuilder::new()
+            .for_the_platform(PlatformType::Linux)
             .with_number_of_thread(5)
             .with_read_only(true)
             .with_root(PathBuf::from("root_test").as_path());
 
-        let new_file_system = filesystem_builder.consume().unwrap();
+        let new_file_system = filesystem_builder.consume();
+        assert_eq!(new_file_system.platform(), PlatformType::Linux);
     }
 }

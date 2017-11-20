@@ -5,7 +5,6 @@ use std::fmt;
 
 use std::sync::Arc;
 
-use core::engine_support_systems::system_management::SystemType;
 use core::engine_support_systems::error_handling::error::GameResult;
 use core::engine_support_systems::system_management::System;
 

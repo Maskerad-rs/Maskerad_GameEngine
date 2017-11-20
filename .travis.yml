@@ -20,7 +20,7 @@ env:
   global:
     - RUSTFLAGS="-C link-dead-code"
 
-#Fore codecov
+#For codecov
 addons:
   apt:
     packages:

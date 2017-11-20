@@ -52,7 +52,13 @@ impl Display for SystemType {
     }
 }
 
+#[derive(Eq, PartialEq, Hash, Clone, Copy, Debug)]
+pub enum PlatformType {
+    Linux,
+}
+
 //TODO: Send and Sync are unsafe traits, we must be sure our systems, traits and trait objects work as expected.
 pub trait System : fmt::Debug + Send + Sync {
     fn system_type(&self) -> SystemType;
+    fn platform(&self) -> PlatformType;
 }

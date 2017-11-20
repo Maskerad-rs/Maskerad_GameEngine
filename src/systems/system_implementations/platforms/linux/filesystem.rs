@@ -8,6 +8,7 @@ use core::engine_support_systems::system_management::systems::filesystems::{VFil
 use core::engine_support_systems::error_handling::error::{GameResult, GameError};
 use core::engine_support_systems::system_management::System;
 use core::engine_support_systems::system_management::SystemType;
+use core::engine_support_systems::system_management::PlatformType;
 
 use std::sync::Arc;
 
@@ -44,6 +45,10 @@ pub struct Filesystem {
 impl System for Filesystem {
     fn system_type(&self) -> SystemType {
         SystemType::Filesystem
+    }
+
+    fn platform(&self) -> PlatformType {
+        PlatformType::Linux
     }
 }
 
