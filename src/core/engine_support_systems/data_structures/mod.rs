@@ -2,6 +2,7 @@ pub mod threadpools;
 
 use std::fmt;
 
+//TODO: A join_all(&self) function ? Like threadpool send a shut_down message, and workers have a loop like this : while (!shut_down) instead of loop{}.
 pub trait ThreadPool : fmt::Debug {
-    fn get_number_of_thread(&self) -> usize;
+    fn number_of_thread(&self) -> usize;
 }

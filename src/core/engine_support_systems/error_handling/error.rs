@@ -14,7 +14,7 @@ use std::io::Error as FileError;
 //for example, if LogError can have multiple cause of failure, create the enum LogErrorType.
 #[derive(Debug)]
 pub enum GameError {
-    LogError(FileError),
+    IOError(String, FileError),
     FileSystemError(String),
     UnknownError(String),
     ThreadPoolError(String),
@@ -23,7 +23,7 @@ pub enum GameError {
 impl Display for GameError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            &GameError::LogError(_) => write!(f, "Log error: {:?}", self),
+            &GameError::IOError(ref description, _) => write!(f, "IO error: {}", description),
             &GameError::FileSystemError(ref description) => write!(f, "File system error: {}", description),
             &GameError::UnknownError(ref description) => write!(f, "Unknown error: {}", description),
             &GameError::ThreadPoolError(ref description) => write!(f, "ThreadPool error: {}", description)
@@ -34,7 +34,7 @@ impl Display for GameError {
 impl Error for GameError {
     fn description(&self) -> &str {
         match self {
-            &GameError::LogError(_) => "LogError",
+            &GameError::IOError(_, _) => "LogError",
             &GameError::FileSystemError(_) => "FileSystemError",
             &GameError::UnknownError(_) => "UnknownError",
             &GameError::ThreadPoolError(_) => "ThreadPoolError",
@@ -43,7 +43,7 @@ impl Error for GameError {
     }
     fn cause(&self) -> Option<&Error> {
         match self {
-            &GameError::LogError(ref file_error) => {
+            &GameError::IOError(_, ref file_error) => {
                 Some(file_error)
             },
             &GameError::FileSystemError(_) => {
@@ -61,14 +61,8 @@ impl Error for GameError {
 
 pub type GameResult<T> = Result<T, GameError>;
 
-impl From<String> for GameError {
-    fn from(s: String) -> GameError {
-        GameError::UnknownError(s)
-    }
-}
-
 impl From<FileError> for GameError {
-    fn from(s: FileError) -> GameError {
-        GameError::LogError(s)
+    fn from(error: FileError) -> Self {
+        GameError::IOError(format!("Error while dealing with file"), error)
     }
 }

@@ -93,6 +93,9 @@ impl Game {
 
         //Out of the game loop, time to quit !
 
+
+        //Join all threadpools, to be sure they finished there last jobs.
+
         //shut down every systems in the inverse order of initialization
     }
 }

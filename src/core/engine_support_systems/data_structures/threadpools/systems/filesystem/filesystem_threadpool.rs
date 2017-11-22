@@ -16,20 +16,18 @@ pub struct FilesystemThreadPool {
 }
 
 impl ThreadPool for FilesystemThreadPool {
-    fn get_number_of_thread(&self) -> usize {
+    fn number_of_thread(&self) -> usize {
         self.workers.len()
     }
 }
 
 impl fmt::Debug for FilesystemThreadPool {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "Filesystem threadpool: nb threads {}, sends {:?}", self.get_number_of_thread(), self.sender)
+        write!(f, "Filesystem threadpool: nb threads {}, sends {:?}", self.number_of_thread(), self.sender)
     }
 }
 
 impl FilesystemThreadPool {
-
-    //TODO: A Function join(&self, worker_id: usize) { workers[worker_id].get_thread().join(); } ??
 
     pub fn execute(&self, message: FilesystemMessage) {
         self.sender.send(message).unwrap();

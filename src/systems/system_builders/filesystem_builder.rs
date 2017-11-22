@@ -1,7 +1,11 @@
 use core::engine_support_systems::system_management::systems::filesystems::VFilesystem;
 use core::engine_support_systems::system_management::PlatformType;
 
-use systems::system_implementations::platforms::linux::filesystem::Filesystem;
+use core::engine_support_systems::data_structures::threadpools::systems::filesystem::filesystem_threadpool::FilesystemThreadPool;
+
+use core::engine_support_systems::error_handling::error::{GameError, GameResult};
+
+use systems::system_implementations::platforms::linux;
 
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
@@ -10,12 +14,10 @@ use std::sync::Arc;
 
 
 //TODO: BUILDERS SHOULD READ CONFIG FILES
-//TODO: Consume should return a GameResult, if an option hasn't been modified to a Some() (mean config file not complete)
 pub struct FileSystemBuilder {
-    number_of_thread: Option<usize>,
-    root: Option<PathBuf>,
-    read_only: Option<bool>,
-    platform: Option<PlatformType>,
+    number_of_thread: Option<usize>, //For the threadpool
+    root: Option<PathBuf>, //for the filesystem creation
+    platform: Option<PlatformType>, //which type of filesystem ?
 }
 
 impl FileSystemBuilder {
@@ -23,7 +25,6 @@ impl FileSystemBuilder {
         FileSystemBuilder {
             number_of_thread: None,
             root: None,
-            read_only: None,
             platform: None,
         }
     }
@@ -43,37 +44,33 @@ impl FileSystemBuilder {
         self
     }
 
-    pub fn with_read_only(mut self, read_only: bool) -> Self {
-        self.read_only = Some(read_only);
-        self
-    }
-
-    pub fn consume(&mut self) -> Arc<VFilesystem>  {
+    pub fn consume(&mut self) -> GameResult<(FilesystemThreadPool, Arc<VFilesystem>)> {
         let root = match self.root {
             Some(ref path) => path.clone(),
-            None => PathBuf::from("root"),
-        };
-
-        let readonly = match self.read_only {
-            Some(value) => value,
-            None => false,
+            None => {
+                return Err(GameError::FileSystemError(format!("The 'root' value was not specified in the filesystem builder !")))
+            },
         };
 
         let number_of_thread = match self.number_of_thread {
             Some(number) => number,
-            None => 4,
+            None => {
+                return Err(GameError::FileSystemError(format!("The 'number of thread' was not specified in the filesystem builder !")))
+            },
         };
 
         match self.platform {
             Some(ref platform) => {
                 match platform {
                     &PlatformType::Linux => {
-                        Arc::new(Filesystem::new(root.as_path(), readonly))
+                        let filesystem = Arc::new(linux::filesystem::Filesystem::new()?);
+                        let threadpool = FilesystemThreadPool::new(number_of_thread, filesystem.clone())?;
+                        Ok((threadpool, filesystem))
                     },
                 }
             },
             None => {
-                Arc::new(Filesystem::new(root.as_path(), readonly))
+                Err(GameError::FileSystemError(format!("The 'platform' value was not specified in the filesystem builder !")))
             }
         }
     }
@@ -84,16 +81,16 @@ impl FileSystemBuilder {
 #[cfg(test)]
 mod filesystem_builder_test {
     use super::*;
-
+    use core::engine_support_systems::data_structures::ThreadPool;
     #[test]
     fn filesystem_builder_builds_for_different_platforms() {
         let mut filesystem_builder = FileSystemBuilder::new()
             .for_the_platform(PlatformType::Linux)
             .with_number_of_thread(5)
-            .with_read_only(true)
-            .with_root(PathBuf::from("root_test").as_path());
+            .with_root(Path::new("/root_test"));
 
-        let new_file_system = filesystem_builder.consume();
-        assert_eq!(new_file_system.platform(), PlatformType::Linux);
+        let (threadpool, filesystem) = filesystem_builder.consume().unwrap();
+        assert_eq!(threadpool.number_of_thread(), 5);
+        assert_eq!(filesystem.platform(), PlatformType::Linux);
     }
 }

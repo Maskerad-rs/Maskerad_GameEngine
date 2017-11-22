@@ -8,10 +8,12 @@ use std::sync::Arc;
 use core::engine_support_systems::error_handling::error::GameResult;
 use core::engine_support_systems::system_management::System;
 
-
+//We create a VFile trait to pave the way to different type of files.
 pub trait VFile: Read + Seek + Write + fmt::Debug {}
 impl<T: Read + Seek + Write + fmt::Debug> VFile for T {}
 
+//Rust provides metadata about files. We provide a VMetadata trait to pave the way to different type of metadata about different files.
+//Metadata, with the cross-platform fs module, only
 pub trait VMetadata {
     //Is it a directory ?
     fn is_dir(&self) -> bool;
@@ -19,10 +21,15 @@ pub trait VMetadata {
     fn is_file(&self) -> bool;
     //The length of the thing.
     fn len(&self) -> u64;
+    //The file type ?
+    fn file_type(&self) -> fs::FileType;
+    //Is the file read only ?
+    fn is_read_only(&self) -> bool;
 }
 
 // We need our own version of this structure because the one in
 // std annoyingly doesn't let you get data out of it.
+//TODO: do we need this stuff ?
 #[derive(Debug, Default, Copy, Clone, PartialEq)]
 pub struct OpenOptions {
     read: bool,
@@ -31,7 +38,6 @@ pub struct OpenOptions {
     append: bool,
     truncate: bool,
 }
-
 impl OpenOptions {
     // Create a new instance
     pub fn new() -> OpenOptions {
@@ -100,12 +106,32 @@ impl OpenOptions {
     }
 }
 
+
 //Open to read file
 //Open to write to file
 //Create file if it doesn't exist
 //Append to file
 //Access to metadata
+
+/*FILESYSTEM.
+
+A filesystem must provide the following functionalities :
+- Manipulating file names and paths.
+- open close read write append create files and directory.
+- does a file or directory exists ?.
+- get metadata about files.
+- scan content of directory.
+- asynchronous I/O (streaming music or textures...).
+*/
 pub trait VFilesystem : System {
+
+    fn display_current_directory(&self) -> GameResult<()>;
+
+    fn current_directory(&self) -> GameResult<PathBuf>;
+
+    fn set_current_directory(&self, path: &Path) -> GameResult<()>;
+
+    fn root_directory(&self) -> PathBuf;
 
     //TODO: SHOULD BE IN A SPECIAL TRAIT
     fn shut_down(&self) -> GameResult<()>;
@@ -142,33 +168,31 @@ pub trait VFilesystem : System {
     //Retrieve all file and directory entries in the given directory.
     //Arc because FS threadpool asks FS to give him. But workers in others threads.
     fn read_dir(&self, path: &Path) -> GameResult<Box<Iterator<Item = GameResult<PathBuf>>>>;
-    //Retrieve the actual location of the filesystem root, if available
-    fn to_path_buf(&self) -> Option<PathBuf>;
-    //Takes an absolute path and returns either a sanitized relative version of it, or None
-    //if there's something bad in it
-    fn sanitize_path(&self, path: &Path) -> Option<PathBuf> {
-        let mut path_components = path.components();
-        match path_components.next() {
-            Some(Component::RootDir) => (),
-            _ => return None,
-        }
+}
 
-        fn is_normal_component(comp: Component) -> Option<&str> {
-            match comp {
-                Component::Normal(s) => s.to_str(),
-                _ => None,
-            }
-        }
-
-        let mut sanitized_path = PathBuf::new();
-        for component in path_components {
-            if let Some(s) = is_normal_component(component) {
-                sanitized_path.push(s)
-            } else {
-                return None;
-            }
-        }
-
-        Some(sanitized_path)
+//Takes an absolute path and returns either a sanitized relative version of it, or a None if there's something bad in the path.
+pub fn sanitize_path(path: &Path) -> Option<PathBuf> {
+    let mut path_components = path.components();
+    match path_components.next() {
+        Some(Component::RootDir) => (),
+        _ => return None,
     }
+
+    fn is_normal_component(comp: Component) -> Option<&str> {
+        match comp {
+            Component::Normal(s) => s.to_str(),
+            _ => None,
+        }
+    }
+
+    // This could be done more cleverly but meh
+    let mut accm = PathBuf::new();
+    for component in path_components {
+        if let Some(s) = is_normal_component(component) {
+            accm.push(s)
+        } else {
+            return None;
+        }
+    }
+    Some(accm)
 }
