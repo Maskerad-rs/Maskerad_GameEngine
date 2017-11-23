@@ -6,13 +6,15 @@ use std::fmt;
 
 use std::env;
 
-use core::engine_support_systems::system_management::systems::filesystems::{VFilesystem, VMetadata, VFile, OpenOptions, sanitize_path};
+use core::engine_support_systems::system_management::systems::filesystems::{VFilesystem, VMetadata, VFile, OpenOptions};
 use core::engine_support_systems::error_handling::error::{GameResult, GameError};
 use core::engine_support_systems::system_management::System;
 use core::engine_support_systems::system_management::SystemType;
 use core::engine_support_systems::system_management::PlatformType;
 
 use std::sync::Arc;
+use std::sync::Mutex;
+use std::sync;
 
 //The Filesystem must:
 //- Give access to files
@@ -58,6 +60,10 @@ impl System for Filesystem {
     fn platform(&self) -> PlatformType {
         PlatformType::Linux
     }
+
+    fn shut_down(&self) -> GameResult<()> {
+        Ok(())
+    }
 }
 
 impl fmt::Debug for Filesystem {
@@ -69,6 +75,7 @@ impl fmt::Debug for Filesystem {
 impl Filesystem {
 
     //create the filesystem and the root directory (the current directory).
+    //The working directory is changed to the root directory of a unix filesystem.
     pub fn new() -> GameResult<Filesystem> {
         match env::current_dir() {
             Ok(path) => {
@@ -83,21 +90,14 @@ impl Filesystem {
     //Used to check the path given by the user.
     fn get_absolute(&self, path: &Path) -> GameResult<PathBuf> {
         let mut root_path = self.current_directory()?;
-        root_path.push(self.root_directory());
         root_path.push(path);
-
-        match sanitize_path(root_path.as_path()) {
-            Some(path) => Ok(path),
-            None => Err(GameError::FileSystemError(format!("Could not obtain an absolute path from the given path ({}) relative to the filesystem's root directory !", root_path.display())))
-        }
+        Ok(root_path)
     }
 }
 
 impl VFilesystem for Filesystem {
 
-    fn shut_down(&self) -> GameResult<()> {
-        Ok(())
-    }
+
 
     fn display_current_directory(&self) -> GameResult<()> {
         println!("{}", self.current_directory()?.display());
@@ -145,7 +145,7 @@ impl VFilesystem for Filesystem {
         if absolute_path.is_dir() {
             fs::remove_dir_all(path).map_err(GameError::from)
         } else {
-            fs::remove_file(path).map_err(GameError::from)
+            Err(GameError::FileSystemError(format!("({}) is not a directory !, use rm instead.", absolute_path.display())))
         }
     }
 
@@ -163,23 +163,24 @@ impl VFilesystem for Filesystem {
         }).map_err(GameError::from)
     }
 
-    //We return an Arc<Iterator<Item=GameResult<PathBuf>>>, not a box. Our filesystem threadpool, with its workers, ask the filesystem
-    //to return an iterator of GameResult<PathBuf>. However, our workers are in other threads.
-    //Walk a directory, only visiting files
-    fn read_dir(&self, path: &Path) -> GameResult<Box<Iterator<Item = GameResult<PathBuf>>>> {
+    fn read_dir(&self, path: &Path) -> GameResult<Vec<fs::DirEntry>> {
         let absolute_path = self.get_absolute(path)?;
+        let mut vec = Vec::new();
 
-        let itr = fs::read_dir(path)?
-            .map(|entry| {
-                let filename = entry.unwrap().file_name().into_string().unwrap();
-                let mut pathbuf = PathBuf::from(path);
-                pathbuf.push(filename);
-                Ok(pathbuf)
-            })
-            .collect::<Vec<GameResult<PathBuf>>>()
-            .into_iter();
+        if absolute_path.is_dir() {
 
-        Ok(Box::new(itr))
+             for entry in fs::read_dir(absolute_path.as_path())? {
+                 let entry = entry?;
+                 let path = entry.path();
+                 if path.is_file() {
+                     vec.push(entry);
+                 }
+             }
+        } else {
+            return Err(GameError::FileSystemError(format!("the path ({}) must be a directory !", absolute_path.display())));
+        }
+
+        Ok(vec)
     }
 }
 
@@ -192,53 +193,20 @@ mod linux_filesystem_test {
     use std::io::Read;
 
     #[test]
-    fn test_path_filtering() {
-        let p = Path::new("/foo");
-        sanitize_path(p).unwrap();
-
-        let p = Path::new("/foo/");
-        sanitize_path(p).unwrap();
-
-        let p = Path::new("/foo/bar.txt");
-        sanitize_path(p).unwrap();
-
-        let p = Path::new("/");
-        sanitize_path(p).unwrap();
-
-        let p = Path::new("../foo");
-        assert!(sanitize_path(p).is_none());
-
-        let p = Path::new("foo");
-        assert!(sanitize_path(p).is_none());
-
-        let p = Path::new("/foo/../../");
-        assert!(sanitize_path(p).is_none());
-
-        let p = Path::new("/foo/../bop");
-        assert!(sanitize_path(p).is_none());
-
-        let p = Path::new("/../bar");
-        assert!(sanitize_path(p).is_none());
-
-        let p = Path::new("");
-        assert!(sanitize_path(p).is_none());
-    }
-
-    #[test]
     fn filesystem_mkdir() {
         let filesystem = Filesystem::new().unwrap();
-        filesystem.mkdir(Path::new("/dir_test")).unwrap();
-        let mut path = filesystem.root.clone();
-        path.push(Path::new("/dir_test"));
-        assert!(filesystem.exists(path.as_path()));
+        let mut dir_test = filesystem.root_directory();
+        dir_test.push(Path::new("dir_test"));
+        filesystem.mkdir(dir_test.as_path()).unwrap();
+        assert!(filesystem.exists(dir_test.as_path()));
     }
 
     #[test]
     fn filesystem_open_then_write_then_append_then_read() {
         let filesystem = Filesystem::new().unwrap();
-        filesystem.create(Path::new("/dir_test/file_test.txt")).expect("Couldn't create file").write_all(b"text_test\n").expect("Couldn't create file and add 'text test'");
-        filesystem.append(Path::new("/dir_test/file_test.txt")).expect("Couldn't append to file").write_all(b"text_append_test\n").expect("Couldn't append to file and add 'text_append-test'");
-        let mut bufreader = BufReader::new(filesystem.open(Path::new("/dir_test/file_test.txt")).expect("Couldn't read file with bufreader"));
+        filesystem.create(Path::new("dir_test/file_test.txt")).expect("Couldn't create file").write_all(b"text_test\n").expect("Couldn't create file and add 'text test'");
+        filesystem.append(Path::new("dir_test/file_test.txt")).expect("Couldn't append to file").write_all(b"text_append_test\n").expect("Couldn't append to file and add 'text_append-test'");
+        let mut bufreader = BufReader::new(filesystem.open(Path::new("dir_test/file_test.txt")).expect("Couldn't read file with bufreader"));
         let mut content = String::new();
         bufreader.read_to_string(&mut content);
 
@@ -250,5 +218,45 @@ mod linux_filesystem_test {
         assert_eq!(lines.next(), None);
     }
 
-    //TODO: Add tests.
+    #[test]
+    fn filesystem_current_working_directory() {
+        let filesystem = Filesystem::new().expect("Could not create FS");
+        assert_eq!(filesystem.current_directory().expect("Couldn't get working directory"), filesystem.root_directory());
+    }
+
+    #[test]
+    fn filesystem_rm_rmrf() {
+        let filesystem = Filesystem::new().expect("Couldn't create FS");
+
+        let mut dir_test = filesystem.root_directory();
+        dir_test.push(Path::new("dir_test"));
+        filesystem.mkdir(dir_test.as_path()).unwrap();
+
+        filesystem.create(Path::new("dir_test/file_test_rm.txt")).expect("Couldn't create file").write_all(b"test rm\n").expect("Coudln't create file and write test rm");
+        filesystem.create(Path::new("dir_test/file_test_rm_2.txt")).expect("Couldn't create file").write_all(b"test rm 2\n").expect("Coudln't create file and write test rm 2");
+        filesystem.rm(Path::new("dir_test/file_test_rm_2.txt")).expect("Couldn't delete the file : file_test_rm_2.txt");
+        assert!(!filesystem.exists(Path::new("dir_test/file_test_rm_2.txt")));
+        filesystem.rmrf(Path::new("dir_test")).expect("Couldn't delete dir");
+        assert!(!filesystem.exists(Path::new("dir_test")));
+
+        filesystem.mkdir(dir_test.as_path()).unwrap();
+    }
+
+    #[test]
+    fn filesystem_metadata() {
+        let filesystem = Filesystem::new().expect("Couldn't create FS");
+        filesystem.create(Path::new("dir_test/file_test.txt")).expect("Couldn't create file").write_all(b"text_test\n").expect("Couldn't create file and add 'text test'");
+        let file_metadata = filesystem.metadata(Path::new("dir_test/file_test.txt")).expect("Couldn't get metadata");
+        assert!(file_metadata.is_file());
+        assert!(!file_metadata.is_dir());
+    }
+
+    #[test]
+    fn filesystem_read_dir() {
+        let filesystem = Filesystem::new().expect("Couldn't create FS");
+        let entries = filesystem.read_dir(Path::new("src")).unwrap();
+        let mut iter = entries.iter();
+        assert!(iter.next().is_some()); //lib.rs
+        assert!(iter.next().is_none()); //nothing, not recusive
+    }
 }

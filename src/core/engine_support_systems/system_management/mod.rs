@@ -8,7 +8,7 @@
 //We can try to use closures to use subsystems in the subsystem_locator.
 pub mod systems;
 
-
+use core::engine_support_systems::error_handling::error::GameResult;
 
 use std::fmt::Display;
 use std::fmt;
@@ -61,4 +61,5 @@ pub enum PlatformType {
 pub trait System : fmt::Debug + Send + Sync {
     fn system_type(&self) -> SystemType;
     fn platform(&self) -> PlatformType;
+    fn shut_down(&self) -> GameResult<()>;
 }

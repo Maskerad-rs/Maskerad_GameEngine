@@ -4,6 +4,7 @@ use std::io::{Read, Seek, Write};
 use std::fmt;
 
 use std::sync::Arc;
+use std::sync::Mutex;
 
 use core::engine_support_systems::error_handling::error::GameResult;
 use core::engine_support_systems::system_management::System;
@@ -125,6 +126,8 @@ A filesystem must provide the following functionalities :
 */
 pub trait VFilesystem : System {
 
+
+
     fn display_current_directory(&self) -> GameResult<()>;
 
     fn current_directory(&self) -> GameResult<PathBuf>;
@@ -132,10 +135,6 @@ pub trait VFilesystem : System {
     fn set_current_directory(&self, path: &Path) -> GameResult<()>;
 
     fn root_directory(&self) -> PathBuf;
-
-    //TODO: SHOULD BE IN A SPECIAL TRAIT
-    fn shut_down(&self) -> GameResult<()>;
-    //
 
     //Open file at path with options
     fn open_with_options(&self, path: &Path, open_options: &OpenOptions) -> GameResult<Box<VFile>>;
@@ -165,34 +164,7 @@ pub trait VFilesystem : System {
     //Arc because FS threadpool asks FS to give him. But workers in others threads.
     fn metadata(&self, path: &Path) -> GameResult<Box<VMetadata>>;
 
-    //Retrieve all file and directory entries in the given directory.
+    //Retrieve all file entries in the given directory (recursive).
     //Arc because FS threadpool asks FS to give him. But workers in others threads.
-    fn read_dir(&self, path: &Path) -> GameResult<Box<Iterator<Item = GameResult<PathBuf>>>>;
-}
-
-//Takes an absolute path and returns either a sanitized relative version of it, or a None if there's something bad in the path.
-pub fn sanitize_path(path: &Path) -> Option<PathBuf> {
-    let mut path_components = path.components();
-    match path_components.next() {
-        Some(Component::RootDir) => (),
-        _ => return None,
-    }
-
-    fn is_normal_component(comp: Component) -> Option<&str> {
-        match comp {
-            Component::Normal(s) => s.to_str(),
-            _ => None,
-        }
-    }
-
-    // This could be done more cleverly but meh
-    let mut accm = PathBuf::new();
-    for component in path_components {
-        if let Some(s) = is_normal_component(component) {
-            accm.push(s)
-        } else {
-            return None;
-        }
-    }
-    Some(accm)
+    fn read_dir(&self, path: &Path) -> GameResult<Vec<fs::DirEntry>>;
 }

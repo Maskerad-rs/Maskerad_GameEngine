@@ -25,36 +25,29 @@ impl FilesystemWorker {
                 let job = receiver.lock().unwrap().recv().unwrap();
 
                 match job {
-                    FilesystemMessage::RemoveFile(name) => {
-                        filesystem.rm(Path::new(name.as_str())).unwrap();
+                    FilesystemMessage::RemoveFile(pathbuf) => {
+                        filesystem.rm(pathbuf.as_path()).unwrap();
                     },
-                    FilesystemMessage::RemoveDirectory(name) => {
-                        filesystem.rmrf(Path::new(name.as_str())).unwrap();
+                    FilesystemMessage::RemoveDirectory(pathbuf) => {
+                        filesystem.rmrf(pathbuf.as_path()).unwrap();
                     },
                     //A worker thread cannot join (he loops forever). However, we can pass Arc<Mutex<Types>> to our messages in order to fill them ?
-                    FilesystemMessage::ReadFile(name, string_to_fill) => {
-                        let file = filesystem.open(Path::new(name.as_str())).unwrap();
+                    FilesystemMessage::ReadFile(pathbuf, string_to_fill) => {
+                        let file = filesystem.open(pathbuf.as_path()).unwrap();
                         let mut buf_reader = BufReader::new(file);
                         buf_reader.read_to_string(&mut *string_to_fill.lock().unwrap()).unwrap();
                     },
-                    FilesystemMessage::ReadDirectory(name, vec_to_fill) => {
-                        //TODO: a string to fill ? maybe a vec<PathBuf> right ?
-                        //let file_iterator = filesystem.read_dir(Path::new(name.as_str())).unwrap();
-                        for path in filesystem.read_dir(Path::new(name.as_str())).unwrap() {
-                            vec_to_fill.lock().unwrap().push(path.unwrap());
-                        }
+                    FilesystemMessage::CreateDirectory(pathbuf) => {
+                        filesystem.mkdir(pathbuf.as_path()).unwrap();
                     },
-                    FilesystemMessage::CreateDirectory(name) => {
-                        filesystem.mkdir(Path::new(name.as_str())).unwrap();
-                    },
-                    FilesystemMessage::AppendToFile(name, text) => {
+                    FilesystemMessage::AppendToFile(pathbuf, text) => {
                         //append only open the file in a certain state, you have to write after.
-                        let mut file = filesystem.append(Path::new(name.as_str())).unwrap();
+                        let mut file = filesystem.append(pathbuf.as_path()).unwrap();
                         file.write_all(text.as_bytes()).unwrap();
                     },
-                    FilesystemMessage::WriteToFile(name, text) => {
+                    FilesystemMessage::WriteToFile(pathbuf, text) => {
                         //same for create.
-                        let mut file = filesystem.create(Path::new(name.as_str())).unwrap();
+                        let mut file = filesystem.create(pathbuf.as_path()).unwrap();
                         file.write_all(text.as_bytes()).unwrap();
                     }
                 }

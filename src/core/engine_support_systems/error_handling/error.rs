@@ -5,6 +5,8 @@ use std::error::Error;
 use std::fmt;
 use std::fmt::Display;
 use std::io::Error as FileError;
+use std::sync;
+use std::fs::DirEntry;
 
 //The GameError enum implement the Error trait, bound to the Debug + Display traits
 //Some enum's struct contain only a description, while other contain a lower-level error,

@@ -2,13 +2,13 @@ use std::sync::Arc;
 use std::sync::Mutex;
 
 use std::path::PathBuf;
+use std::fs;
 
 pub enum FilesystemMessage {
-    ReadFile(String, Arc<Mutex<String>>),
-    WriteToFile(String, String),
-    AppendToFile(String, String),
-    CreateDirectory(String),
-    RemoveFile(String),
-    RemoveDirectory(String),
-    ReadDirectory(String, Arc<Mutex<Vec<PathBuf>>>),
+    ReadFile(PathBuf, Arc<Mutex<String>>),
+    WriteToFile(PathBuf, String),
+    AppendToFile(PathBuf, String),
+    CreateDirectory(PathBuf),
+    RemoveFile(PathBuf),
+    RemoveDirectory(PathBuf),
 }
