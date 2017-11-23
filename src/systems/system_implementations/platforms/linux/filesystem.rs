@@ -191,7 +191,7 @@ mod linux_filesystem_test {
     use super::*;
     use std::io::BufReader;
     use std::io::Read;
-
+    /*
     #[test]
     fn filesystem_mkdir() {
         let filesystem = Filesystem::new().unwrap();
@@ -217,13 +217,14 @@ mod linux_filesystem_test {
         assert_eq!(lines.next(), Some("text_append_test"));
         assert_eq!(lines.next(), None);
     }
+    */
 
     #[test]
     fn filesystem_current_working_directory() {
         let filesystem = Filesystem::new().expect("Could not create FS");
         assert_eq!(filesystem.current_directory().expect("Couldn't get working directory"), filesystem.root_directory());
     }
-
+    /*
     #[test]
     fn filesystem_rm_rmrf() {
         let filesystem = Filesystem::new().expect("Couldn't create FS");
@@ -250,6 +251,7 @@ mod linux_filesystem_test {
         assert!(file_metadata.is_file());
         assert!(!file_metadata.is_dir());
     }
+    */
 
     #[test]
     fn filesystem_read_dir() {
