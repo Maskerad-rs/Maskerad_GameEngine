@@ -1,6 +1,8 @@
 use core::engine_support_systems::data_structures::threadpools::systems::filesystem::filesystem_threadpool_messages::FilesystemMessage;
 use core::engine_support_systems::system_management::systems::filesystems::VFilesystem;
 
+use core::engine_support_systems::error_handling::error::{GameError, GameResult};
+
 use std::path::Path;
 use std::io::BufReader;
 use std::io::Read;
@@ -16,13 +18,18 @@ pub struct FilesystemWorker {
 }
 
 impl FilesystemWorker {
-    pub fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<FilesystemMessage>>>, filesystem: Arc<VFilesystem> ) -> Self {
-        let thread = thread::spawn(move || {
+    pub fn new(id: usize, receiver: Arc<Mutex<mpsc::Receiver<FilesystemMessage>>>, filesystem: Arc<VFilesystem> ) -> GameResult<Self> {
+
+        let mut worker_name = String::from("filesystem_worker_");
+        let id_str = id.to_string();
+        worker_name.push_str(id_str.as_str());
+
+        let thread = thread::Builder::new().name(worker_name).spawn(move || {
             loop {
                 //We use recv, not try_recv. recv always block the current thread if there's no data available.
                 //However, if i'm not mistaken, recv isn't invoked in the main thread, so there's no big deal.
                 //and try_recv returns an error if the buffer is empty. Definitely not adapted to a thread pool.
-                let job = receiver.lock().unwrap().recv().unwrap();
+                let job = receiver.lock().expect("Could not").recv().unwrap();
 
                 match job {
                     FilesystemMessage::RemoveFile(pathbuf) => {
@@ -44,6 +51,8 @@ impl FilesystemWorker {
                         //append only open the file in a certain state, you have to write after.
                         let mut file = filesystem.append(pathbuf.as_path()).unwrap();
                         file.write_all(text.as_bytes()).unwrap();
+                        //TODO: should we use sync_all(), or sync_data() ? The problem is that only fs::File has those functions...
+                        // and we operate with the trait object VFile: Read + Seek + Write + Debug
                     },
                     FilesystemMessage::WriteToFile(pathbuf, text) => {
                         //same for create.
@@ -52,11 +61,11 @@ impl FilesystemWorker {
                     }
                 }
             }
-        });
+        })?;
 
-        FilesystemWorker {
+        Ok(FilesystemWorker {
             id,
             thread,
-        }
+        })
     }
 }

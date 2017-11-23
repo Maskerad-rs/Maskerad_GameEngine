@@ -11,6 +11,8 @@ use core::engine_support_systems::system_management::System;
 
 //We create a VFile trait to pave the way to different type of files.
 pub trait VFile: Read + Seek + Write + fmt::Debug {}
+//TODO: Think about the different types of files (StreamableTexture ? MusicFile ? ShaderFile ? LogFile ?)
+
 impl<T: Read + Seek + Write + fmt::Debug> VFile for T {}
 
 //Rust provides metadata about files. We provide a VMetadata trait to pave the way to different type of metadata about different files.

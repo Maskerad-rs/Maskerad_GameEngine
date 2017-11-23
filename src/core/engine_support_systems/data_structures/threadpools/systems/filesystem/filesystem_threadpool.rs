@@ -27,10 +27,12 @@ impl fmt::Debug for FilesystemThreadPool {
     }
 }
 
+//TODO: impl drop -> when out of scope, change threadpool_alive: bool to false, which quit the loop of the worker, and call join() on each worker.
 impl FilesystemThreadPool {
 
-    pub fn execute(&self, message: FilesystemMessage) {
-        self.sender.send(message).unwrap();
+    pub fn execute(&self, message: FilesystemMessage) -> GameResult<()> {
+        self.sender.send(message)?;
+        Ok(())
     }
 
     pub fn new(size: usize, filesystem: Arc<VFilesystem>) -> GameResult<FilesystemThreadPool> {
@@ -44,7 +46,7 @@ impl FilesystemThreadPool {
             let mut workers = Vec::with_capacity(size);
 
             for id in 0..size {
-                workers.push(FilesystemWorker::new(id, receiver.clone(), filesystem.clone()));
+                workers.push(FilesystemWorker::new(id, receiver.clone(), filesystem.clone())?);
             }
 
             Ok(FilesystemThreadPool {

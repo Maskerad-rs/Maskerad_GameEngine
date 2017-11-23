@@ -3,6 +3,7 @@
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::fmt;
+use std::io;
 
 use std::env;
 
@@ -15,16 +16,6 @@ use core::engine_support_systems::system_management::PlatformType;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync;
-
-//The Filesystem must:
-//- Give access to files
-
-//game name (root)
-//logs
-//
-
-//TODO: Partially rewrite the linux filesystem.
-//TODO: stop using unwrap, handle those goddamn errors with our GameResult<>
 
 pub struct Metadata(fs::Metadata);
 impl VMetadata for Metadata {

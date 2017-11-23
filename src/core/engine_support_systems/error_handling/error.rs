@@ -8,6 +8,9 @@ use std::io::Error as FileError;
 use std::sync;
 use std::fs::DirEntry;
 
+use core::engine_support_systems::data_structures::threadpools::systems::filesystem::filesystem_threadpool_messages::FilesystemMessage;
+
+type FilesystemSendError = sync::mpsc::SendError<FilesystemMessage>;
 //The GameError enum implement the Error trait, bound to the Debug + Display traits
 //Some enum's struct contain only a description, while other contain a lower-level error,
 //which is meant to be passed to the cause() function from the Error trait.
@@ -18,6 +21,7 @@ use std::fs::DirEntry;
 pub enum GameError {
     IOError(String, FileError),
     FileSystemError(String),
+    FileSystemSenderMessageError(String, FilesystemSendError),
     UnknownError(String),
     ThreadPoolError(String),
 }
@@ -26,6 +30,7 @@ impl Display for GameError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             &GameError::IOError(ref description, _) => write!(f, "IO error: {}", description),
+            &GameError::FileSystemSenderMessageError(ref description, _) => write!(f, "Filesystem message sender error: {}", description),
             &GameError::FileSystemError(ref description) => write!(f, "File system error: {}", description),
             &GameError::UnknownError(ref description) => write!(f, "Unknown error: {}", description),
             &GameError::ThreadPoolError(ref description) => write!(f, "ThreadPool error: {}", description)
@@ -38,6 +43,7 @@ impl Error for GameError {
         match self {
             &GameError::IOError(_, _) => "LogError",
             &GameError::FileSystemError(_) => "FileSystemError",
+            &GameError::FileSystemSenderMessageError(_, _) => "FilesystemSenderMessageError",
             &GameError::UnknownError(_) => "UnknownError",
             &GameError::ThreadPoolError(_) => "ThreadPoolError",
 
@@ -50,6 +56,9 @@ impl Error for GameError {
             },
             &GameError::FileSystemError(_) => {
                 None
+            },
+            &GameError::FileSystemSenderMessageError(_, ref sender_error) => {
+                Some(sender_error)
             },
             &GameError::UnknownError(_) => {
                 None
@@ -66,5 +75,11 @@ pub type GameResult<T> = Result<T, GameError>;
 impl From<FileError> for GameError {
     fn from(error: FileError) -> Self {
         GameError::IOError(format!("Error while dealing with file"), error)
+    }
+}
+
+impl From<FilesystemSendError> for GameError {
+    fn from(error: FilesystemSendError) -> Self {
+        GameError::FileSystemSenderMessageError(format!("Error while sending a message to the filesystem threadpool"), error)
     }
 }
