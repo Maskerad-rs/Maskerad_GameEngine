@@ -136,9 +136,23 @@ impl VFilesystem for Filesystem {
     fn rmrf(&self, path: &Path) -> GameResult<()> {
         let absolute_path = self.get_absolute(path)?;
         if absolute_path.is_dir() {
-            fs::remove_dir_all(path).map_err(GameError::from)
+            //Scan the content of the directory, recursively apply the function if it's a directory, or delete the file if it's a file.
+            for entry in self.read_dir(absolute_path.as_path())? {
+                let entry = entry?;
+                let path = entry.path();
+                if path.is_dir() {
+                    self.rmrf(path.as_path())?;
+                } else {
+                    self.rm(path.as_path())?;
+                }
+            }
+            //delete the now empty directory
+            self.rm(absolute_path.as_path())?;
+
+            Ok(())
+            //fs::remove_dir_all(path).map_err(GameError::from)
         } else {
-            Err(GameError::FileSystemError(format!("({}) is not a directory !, use rm instead.", absolute_path.display())))
+            Err(GameError::FileSystemError(format!("({}) is not a directory !, use rm instead if you want to delete a file.", absolute_path.display())))
         }
     }
 
@@ -156,24 +170,17 @@ impl VFilesystem for Filesystem {
         }).map_err(GameError::from)
     }
 
-    fn read_dir(&self, path: &Path) -> GameResult<Vec<fs::DirEntry>> {
+    fn read_dir(&self, path: &Path) -> GameResult<fs::ReadDir> {
         let absolute_path = self.get_absolute(path)?;
-        let mut vec = Vec::new();
 
         if absolute_path.is_dir() {
-
-             for entry in fs::read_dir(absolute_path.as_path())? {
-                 let entry = entry?;
-                 let path = entry.path();
-                 if path.is_file() {
-                     vec.push(entry);
-                 }
-             }
+            match fs::read_dir(absolute_path.as_path()) {
+                Ok(readdir) => Ok(readdir),
+                Err(e) => Err(GameError::IOError(format!("Could not read the content of the directory at path ({})", absolute_path.display()), e))
+            }
         } else {
             return Err(GameError::FileSystemError(format!("the path ({}) must be a directory !", absolute_path.display())));
         }
-
-        Ok(vec)
     }
 }
 
@@ -227,9 +234,12 @@ mod linux_filesystem_test {
     #[test]
     fn filesystem_read_dir() {
         let filesystem = Filesystem::new().expect("Couldn't create FS");
-        let entries = filesystem.read_dir(Path::new("src")).unwrap();
-        let mut iter = entries.iter();
-        assert!(iter.next().is_some()); //lib.rs
-        assert!(iter.next().is_none()); //nothing, not recursive
+        let mut entries = filesystem.read_dir(Path::new("src")).unwrap();
+        assert!(entries.next().is_some()); //lib.rs
+        assert!(entries.next().is_some()); //systems
+        assert!(entries.next().is_some()); //gameplay
+        assert!(entries.next().is_some()); //game_specific
+        assert!(entries.next().is_some()); //core
+        assert!(entries.next().is_none()); //nothing
     }
 }

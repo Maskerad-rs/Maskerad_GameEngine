@@ -168,5 +168,5 @@ pub trait VFilesystem : System {
 
     //Retrieve all file entries in the given directory (recursive).
     //Arc because FS threadpool asks FS to give him. But workers in others threads.
-    fn read_dir(&self, path: &Path) -> GameResult<Vec<fs::DirEntry>>;
+    fn read_dir(&self, path: &Path) -> GameResult<fs::ReadDir>;
 }
