@@ -26,20 +26,12 @@ impl Game {
         //create the systems...
         let mut game_clock = Clock::new();
 
-        //Read config files
+        //Read config files (saved options or something like that)
 
-        //Create systems builders according to the config read. (platform, number of threads...).
+        //create a rayon's user-created threadpool ? to use install() ?
+        //Should gameobjects own a Rc<Threadpool> ? When world call update on the object, the object call update to its components and pass a clone of this threadpool
 
-        //create our multithreaded ref counted immutable systems (Arc<OurSystem>)
-
-        //create the singleton system threadpools.
-        //Our objects will send messages to those system threadpools.
-        //Those threadpools will repackages those messages to send
-        //messages to their workers.
-        //Those threadpools, when created, contain a 'reference' to the systems.
-        //When sending a message to their workers, those threadpools will
-        //package the message AND a 'reference' to the system.
-
+        //create our systems( only the cpu intensive systems should use the threadpool, not a filesystem...
 
         //Prepare the gameloop
 
@@ -94,7 +86,7 @@ impl Game {
         //Out of the game loop, time to quit !
 
 
-        //Join all threadpools, to be sure they finished there last jobs.
+        //THe rayon threadpool impl the drop trait. Nothing to do the handle the destruction of it.
 
         //shut down every systems in the inverse order of initialization
     }

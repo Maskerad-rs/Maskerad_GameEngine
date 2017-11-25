@@ -1,5 +1,6 @@
 extern crate cgmath;
 extern crate rand;
+extern crate rayon;
 
 pub mod core;
 pub mod systems;

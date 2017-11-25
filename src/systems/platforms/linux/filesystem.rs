@@ -7,6 +7,8 @@ use std::io;
 
 use std::env;
 
+use rayon;
+
 use core::engine_support_systems::system_management::systems::filesystems::{VFilesystem, VMetadata, VFile, OpenOptions};
 use core::engine_support_systems::error_handling::error::{GameResult, GameError};
 use core::engine_support_systems::system_management::System;
@@ -182,7 +184,7 @@ mod linux_filesystem_test {
     use super::*;
     use std::io::BufReader;
     use std::io::Read;
-    /*
+
     #[test]
     fn filesystem_mkdir() {
         let filesystem = Filesystem::new().unwrap();
@@ -190,39 +192,21 @@ mod linux_filesystem_test {
         dir_test.push(Path::new("dir_test"));
         filesystem.mkdir(dir_test.as_path()).unwrap();
         assert!(filesystem.exists(dir_test.as_path()));
-    }
 
-    #[test]
-    fn filesystem_open_then_write_then_append_then_read() {
-        let filesystem = Filesystem::new().unwrap();
         filesystem.create(Path::new("dir_test/file_test.txt")).expect("Couldn't create file").write_all(b"text_test\n").expect("Couldn't create file and add 'text test'");
         filesystem.append(Path::new("dir_test/file_test.txt")).expect("Couldn't append to file").write_all(b"text_append_test\n").expect("Couldn't append to file and add 'text_append-test'");
         let mut bufreader = BufReader::new(filesystem.open(Path::new("dir_test/file_test.txt")).expect("Couldn't read file with bufreader"));
         let mut content = String::new();
         bufreader.read_to_string(&mut content);
-
         let mut lines = content.lines();
-
         println!("{:?}", content);
         assert_eq!(lines.next(), Some("text_test"));
         assert_eq!(lines.next(), Some("text_append_test"));
         assert_eq!(lines.next(), None);
-    }
-    */
 
-    #[test]
-    fn filesystem_current_working_directory() {
-        let filesystem = Filesystem::new().expect("Could not create FS");
-        assert_eq!(filesystem.current_directory().expect("Couldn't get working directory"), filesystem.root_directory());
-    }
-    /*
-    #[test]
-    fn filesystem_rm_rmrf() {
-        let filesystem = Filesystem::new().expect("Couldn't create FS");
-
-        let mut dir_test = filesystem.root_directory();
-        dir_test.push(Path::new("dir_test"));
-        filesystem.mkdir(dir_test.as_path()).unwrap();
+        let file_metadata = filesystem.metadata(Path::new("dir_test/file_test.txt")).expect("Couldn't get metadata");
+        assert!(file_metadata.is_file());
+        assert!(!file_metadata.is_dir());
 
         filesystem.create(Path::new("dir_test/file_test_rm.txt")).expect("Couldn't create file").write_all(b"test rm\n").expect("Coudln't create file and write test rm");
         filesystem.create(Path::new("dir_test/file_test_rm_2.txt")).expect("Couldn't create file").write_all(b"test rm 2\n").expect("Coudln't create file and write test rm 2");
@@ -230,19 +214,15 @@ mod linux_filesystem_test {
         assert!(!filesystem.exists(Path::new("dir_test/file_test_rm_2.txt")));
         filesystem.rmrf(Path::new("dir_test")).expect("Couldn't delete dir");
         assert!(!filesystem.exists(Path::new("dir_test")));
-
-        filesystem.mkdir(dir_test.as_path()).unwrap();
     }
+
 
     #[test]
-    fn filesystem_metadata() {
-        let filesystem = Filesystem::new().expect("Couldn't create FS");
-        filesystem.create(Path::new("dir_test/file_test.txt")).expect("Couldn't create file").write_all(b"text_test\n").expect("Couldn't create file and add 'text test'");
-        let file_metadata = filesystem.metadata(Path::new("dir_test/file_test.txt")).expect("Couldn't get metadata");
-        assert!(file_metadata.is_file());
-        assert!(!file_metadata.is_dir());
+    fn filesystem_current_working_directory() {
+        let filesystem = Filesystem::new().expect("Could not create FS");
+        assert_eq!(filesystem.current_directory().expect("Couldn't get working directory"), filesystem.root_directory());
     }
-    */
+
 
     #[test]
     fn filesystem_read_dir() {
@@ -250,6 +230,6 @@ mod linux_filesystem_test {
         let entries = filesystem.read_dir(Path::new("src")).unwrap();
         let mut iter = entries.iter();
         assert!(iter.next().is_some()); //lib.rs
-        assert!(iter.next().is_none()); //nothing, not recusive
+        assert!(iter.next().is_none()); //nothing, not recursive
     }
 }
