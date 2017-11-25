@@ -51,18 +51,10 @@ impl OpenOptions {
         self
     }
 
-    pub fn is_read(&self) -> bool {
-        self.read
-    }
-
     // Open for writing
     pub fn set_write(&mut self, write: bool) -> &mut OpenOptions {
         self.write = write;
         self
-    }
-
-    pub fn is_write(&self) -> bool {
-        self.write
     }
 
     // Create the file if it does not exist yet
@@ -71,28 +63,16 @@ impl OpenOptions {
         self
     }
 
-    pub fn is_create(&self) -> bool {
-        self.create
-    }
-
     // Append at the end of the file
     pub fn set_append(&mut self, append: bool) -> &mut OpenOptions {
         self.append = append;
         self
     }
 
-    pub fn is_append(&self) -> bool {
-        self.append
-    }
-
     // Truncate the file to 0 bytes after opening
     pub fn set_truncate(&mut self, truncate: bool) -> &mut OpenOptions {
         self.truncate = truncate;
         self
-    }
-
-    pub fn is_truncate(&self) -> bool {
-        self.truncate
     }
 
     pub fn to_fs_openoptions(&self) -> fs::OpenOptions {
