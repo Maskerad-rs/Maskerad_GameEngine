@@ -150,8 +150,6 @@ impl VFilesystem for Filesystem {
     }
 }
 
-
-//TODO: test the physical filesystem
 #[cfg(test)]
 mod linux_filesystem_test {
     use super::*;

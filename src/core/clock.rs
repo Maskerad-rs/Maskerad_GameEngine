@@ -65,7 +65,6 @@ impl Clock {
     }
 }
 
-//TODO: clock unit tests
 #[cfg(test)]
 mod clock_tests {
     use super::*;
