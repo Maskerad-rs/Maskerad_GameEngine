@@ -7,7 +7,7 @@ use std::io;
 
 use std::env;
 
-use rayon;
+use remove_dir_all;
 
 use core::engine_support_systems::system_management::systems::filesystems::{VFilesystem, VMetadata, VFile, OpenOptions};
 use core::engine_support_systems::error_handling::error::{GameResult, GameError};
@@ -136,21 +136,10 @@ impl VFilesystem for Filesystem {
     fn rmrf(&self, path: &Path) -> GameResult<()> {
         let absolute_path = self.get_absolute(path)?;
         if absolute_path.is_dir() {
-            //Scan the content of the directory, recursively apply the function if it's a directory, or delete the file if it's a file.
-            for entry in self.read_dir(absolute_path.as_path())? {
-                let entry = entry?;
-                let path = entry.path();
-                if path.is_dir() {
-                    self.rmrf(path.as_path())?;
-                } else {
-                    self.rm(path.as_path())?;
-                }
+            match remove_dir_all::remove_dir_all(absolute_path.as_path()) {
+                Ok(()) => Ok(()),
+                Err(e) => Err(GameError::IOError(format!("Error while deleting the directory ({})", absolute_path.display()), e)),
             }
-            //delete the now empty directory
-            self.rm(absolute_path.as_path())?;
-
-            Ok(())
-            //fs::remove_dir_all(path).map_err(GameError::from)
         } else {
             Err(GameError::FileSystemError(format!("({}) is not a directory !, use rm instead if you want to delete a file.", absolute_path.display())))
         }
