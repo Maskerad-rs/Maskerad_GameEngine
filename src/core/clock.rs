@@ -28,15 +28,15 @@ impl Clock {
         }
     }
 
-    pub fn get_total_time_seconds(&self) -> f64 {
+    pub fn total_time_seconds(&self) -> f64 {
         self.total_time.as_secs() as f64 + (self.total_time.subsec_nanos() as f64 * 1e-9) as f64
     }
 
-    pub fn get_current_time() -> Instant {
+    pub fn current_time(&self) -> Instant {
         Instant::now()
     }
 
-    pub fn calculate_delta_time_seconds(begin_tick: Instant, end_tick: Instant) -> f64 {
+    pub fn calculate_delta_time_seconds(&self, begin_tick: Instant, end_tick: Instant) -> f64 {
         let duration = end_tick.duration_since(begin_tick);
         duration.as_secs() as f64 + (duration.subsec_nanos() as f64 * 1e-9) as f64
     }
@@ -49,7 +49,7 @@ impl Clock {
         self.paused = paused;
     }
 
-    pub fn get_time_scale(&self) -> f64 {
+    pub fn time_scale(&self) -> f64 {
         self.time_scale
     }
 
@@ -66,3 +66,51 @@ impl Clock {
 }
 
 //TODO: clock unit tests
+#[cfg(test)]
+mod clock_tests {
+    use super::*;
+    use std::thread;
+
+    #[test]
+    fn clock_creation_and_accessors() {
+        let mut clock = Clock::new();
+        assert!(!clock.is_paused());
+        clock.set_paused(true);
+        assert!(clock.is_paused());
+        clock.set_paused(false);
+
+        assert_eq!(clock.time_scale(), 1.0);
+        clock.set_time_scale(2.0);
+        assert_eq!(clock.time_scale(), 2.0);
+
+    }
+
+    #[test]
+    fn clock_single_step() {
+        let mut clock = Clock::new();
+        clock.set_paused(true);
+        clock.single_step();
+        assert!(clock.total_time_seconds() >= 0.016);
+        clock.single_step();
+        assert!(clock.total_time_seconds() >= 0.032);
+    }
+
+    #[test]
+    fn clock_calculate_dt_second() {
+        let mut clock = Clock::new();
+        let old_time = clock.current_time();
+        thread::sleep(Duration::from_secs(1));
+        let new_time = clock.current_time();
+        let dt = clock.calculate_delta_time_seconds(old_time, new_time);
+        assert!(dt >= 1.0);
+    }
+
+    #[test]
+    fn clock_update() {
+        let mut clock = Clock::new();
+        clock.update(0.016); // + 0.016
+        clock.set_time_scale(2.0);
+        clock.update(0.016); // + 0.032
+        assert!(clock.total_time_seconds() >= 0.048);
+    }
+}

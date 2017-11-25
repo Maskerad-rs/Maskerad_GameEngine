@@ -30,9 +30,6 @@ impl VMetadata for Metadata {
     fn len(&self) -> u64 {
         self.0.len()
     }
-    fn file_type(&self) -> fs::FileType {
-        self.0.file_type()
-    }
     fn is_read_only(&self) -> bool {
         self.0.permissions().readonly()
     }
@@ -40,6 +37,7 @@ impl VMetadata for Metadata {
 
 
 
+#[derive(Debug)]
 pub struct Filesystem {
     root: PathBuf,
     //TODO: Should the filesystem contain 'conventional paths' ? (resource directory, log directory...).
@@ -55,13 +53,7 @@ impl System for Filesystem {
     }
 
     fn shut_down(&self) -> GameResult<()> {
-        Ok(())
-    }
-}
-
-impl fmt::Debug for Filesystem {
-    fn fmt(&self, f: &mut fmt::Formatter) -> Result<(), fmt::Error> {
-        write!(f, "<Filesystem root: {}>", self.root.display())
+        unimplemented!();
     }
 }
 
@@ -82,28 +74,13 @@ impl Filesystem {
 
     //Used to check the path given by the user.
     fn get_absolute(&self, path: &Path) -> GameResult<PathBuf> {
-        let mut root_path = self.current_directory()?;
+        let mut root_path = self.root_directory();
         root_path.push(path);
         Ok(root_path)
     }
 }
 
 impl VFilesystem for Filesystem {
-
-
-
-    fn display_current_directory(&self) -> GameResult<()> {
-        println!("{}", self.current_directory()?.display());
-        Ok(())
-    }
-
-    fn current_directory(&self) -> GameResult<PathBuf> {
-        env::current_dir().map(|path| path).map_err(GameError::from)
-    }
-
-    fn set_current_directory(&self, path: &Path) -> GameResult<()> {
-        env::set_current_dir(path).map_err(GameError::from)
-    }
 
     fn root_directory(&self) -> PathBuf {
         self.root.clone()
@@ -203,6 +180,8 @@ mod linux_filesystem_test {
         let file_metadata = filesystem.metadata(Path::new("dir_test/file_test.txt")).expect("Couldn't get metadata");
         assert!(file_metadata.is_file());
         assert!(!file_metadata.is_dir());
+        assert!(!file_metadata.is_read_only());
+        assert!(file_metadata.len() > 0);
 
         filesystem.create(Path::new("dir_test/file_test_rm.txt")).expect("Couldn't create file").write_all(b"test rm\n").expect("Coudln't create file and write test rm");
         filesystem.create(Path::new("dir_test/file_test_rm_2.txt")).expect("Couldn't create file").write_all(b"test rm 2\n").expect("Coudln't create file and write test rm 2");
@@ -216,7 +195,7 @@ mod linux_filesystem_test {
     #[test]
     fn filesystem_current_working_directory() {
         let filesystem = Filesystem::new().expect("Could not create FS");
-        assert_eq!(filesystem.current_directory().expect("Couldn't get working directory"), filesystem.root_directory());
+        assert_eq!(env::current_dir().expect("Couldn't get the current working directory"), filesystem.root_directory());
     }
 
 
@@ -230,5 +209,17 @@ mod linux_filesystem_test {
         assert!(entries.next().is_some()); //game_specific
         assert!(entries.next().is_some()); //core
         assert!(entries.next().is_none()); //nothing
+    }
+
+    #[test]
+    fn filesystem_system_type() {
+        let filesystem = Filesystem::new().expect("Couldn't create FS.");
+        assert_eq!(filesystem.system_type(), SystemType::Filesystem);
+    }
+
+    #[test]
+    fn filesystem_platofrm_type() {
+        let filesystem = Filesystem::new().expect("Couldn't create FS.");
+        assert_eq!(filesystem.platform(), PlatformType::Linux);
     }
 }

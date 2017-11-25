@@ -24,8 +24,6 @@ pub trait VMetadata {
     fn is_file(&self) -> bool;
     //The length of the thing.
     fn len(&self) -> u64;
-    //The file type ?
-    fn file_type(&self) -> fs::FileType;
     //Is the file read only ?
     fn is_read_only(&self) -> bool;
 }
@@ -127,14 +125,6 @@ A filesystem must provide the following functionalities :
 - asynchronous I/O (streaming music or textures...).
 */
 pub trait VFilesystem : System {
-
-
-
-    fn display_current_directory(&self) -> GameResult<()>;
-
-    fn current_directory(&self) -> GameResult<PathBuf>;
-
-    fn set_current_directory(&self, path: &Path) -> GameResult<()>;
 
     fn root_directory(&self) -> PathBuf;
 

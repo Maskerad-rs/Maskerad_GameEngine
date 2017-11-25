@@ -1,4 +1,4 @@
-extern crate kindred_engine;
+extern crate blacksmith_game_engine;
 
 #[test]
 fn test() {

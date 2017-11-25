@@ -37,14 +37,14 @@ impl Game {
 
         //preferred delta time
         let mut delta = self.preferred_frame_rate_millisec;
-        let mut previous_time = Clock::get_current_time();
-        let mut current_time = Clock::get_current_time();
+        let mut previous_time = game_clock.current_time();
+        let mut current_time = game_clock.current_time();
         let mut lag = 0.0;
 
         while !self.game_over {
-            current_time = Clock::get_current_time();
+            current_time = game_clock.current_time();
 
-            delta = Clock::calculate_delta_time_seconds(previous_time, current_time);
+            delta = game_clock.calculate_delta_time_seconds(previous_time, current_time);
             previous_time = current_time;
             lag += delta;
 
