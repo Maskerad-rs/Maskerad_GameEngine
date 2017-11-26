@@ -6,8 +6,22 @@ use std::fmt;
 use std::sync::Arc;
 use std::sync::Mutex;
 
+use app_dirs;
+
 use core::engine_support_systems::error_handling::error::GameResult;
 use core::engine_support_systems::system_management::System;
+
+//Enum used to specify the 'root' directory from where to write/delete/open dir/files
+#[derive(Debug, Copy, Clone)]
+pub enum RootDir {
+    WorkingDirectory,
+    UserDataRoot,
+    UserConfigRoot,
+    UserEngineConfigurationRoot,
+    UserLogRoot,
+    //TODO: UserSaveRoot ?
+}
+
 
 //We create a VFile trait to pave the way to different type of files.
 pub trait VFile: Read + Seek + Write + fmt::Debug {}
@@ -106,37 +120,50 @@ A filesystem must provide the following functionalities :
 */
 pub trait VFilesystem : System {
 
-    fn root_directory(&self) -> PathBuf;
+    fn application_info(&self) -> &app_dirs::AppInfo;
+
+    fn user_data_root(&self) -> PathBuf;
+
+    fn user_config_root(&self) -> PathBuf;
+
+    fn user_engine_configuration_dir(&self) -> PathBuf;
+
+    fn user_log_dir(&self) -> PathBuf;
+
+    //TODO: user_saves_dir() ?
+
+
+    fn working_directory(&self) -> PathBuf;
 
     //Open file at path with options
-    fn open_with_options(&self, path: &Path, open_options: &OpenOptions) -> GameResult<Box<VFile>>;
+    fn open_with_options(&self, root_dir: RootDir, path: &str, open_options: &OpenOptions) -> GameResult<Box<VFile>>;
 
     //Open file at path to read
-    fn open(&self, path: &Path) -> GameResult<Box<VFile>> {
-        self.open_with_options(path, OpenOptions::new().set_read(true))
+    fn open(&self, root_dir: RootDir, path: &str) -> GameResult<Box<VFile>> {
+        self.open_with_options(root_dir, path, OpenOptions::new().set_read(true))
     }
     //Open file at path for writing, truncates if file already exist
-    fn create(&self, path: &Path) -> GameResult<Box<VFile>> {
-        self.open_with_options(path, OpenOptions::new().set_create(true).set_write(true).set_truncate(true))
+    fn create(&self, root_dir: RootDir, path: &str) -> GameResult<Box<VFile>> {
+        self.open_with_options( root_dir, path, OpenOptions::new().set_create(true).set_write(true).set_truncate(true))
     }
     //Open the file at path for appending, creating it if necessary
-    fn append(&self, path: &Path) -> GameResult<Box<VFile>> {
-        self.open_with_options(path, OpenOptions::new().set_create(true).set_append(true).set_write(true))
+    fn append(&self, root_dir: RootDir, path: &str) -> GameResult<Box<VFile>> {
+        self.open_with_options(root_dir, path, OpenOptions::new().set_create(true).set_append(true).set_write(true))
     }
     //create directory at path
-    fn mkdir(&self, path: &Path) -> GameResult<()>;
+    fn mkdir(&self, root_dir: RootDir, path: &str) -> GameResult<()>;
     //remove a file
-    fn rm(&self, path: &Path) -> GameResult<()>;
+    fn rm(&self, root_dir: RootDir, path: &str) -> GameResult<()>;
     //remove file or directory and all its contents
-    fn rmrf(&self, path: &Path) -> GameResult<()>;
+    fn rmrf(&self, root_dir: RootDir, path: &str) -> GameResult<()>;
     //Check if file exists
-    fn exists(&self, path: &Path) -> bool;
+    fn exists(&self, root_dir: RootDir, path: &str) -> bool;
 
     //Get file's metadata
     //Arc because FS threadpool asks FS to give him. But workers in others threads.
-    fn metadata(&self, path: &Path) -> GameResult<Box<VMetadata>>;
+    fn metadata(&self, root_dir: RootDir, path: &str) -> GameResult<Box<VMetadata>>;
 
     //Retrieve all file entries in the given directory (recursive).
     //Arc because FS threadpool asks FS to give him. But workers in others threads.
-    fn read_dir(&self, path: &Path) -> GameResult<fs::ReadDir>;
+    fn read_dir(&self, root_dir: RootDir, path: &str) -> GameResult<fs::ReadDir>;
 }

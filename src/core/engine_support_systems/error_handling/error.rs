@@ -8,6 +8,8 @@ use std::io::Error as FileError;
 use std::sync;
 use std::fs::DirEntry;
 
+use app_dirs;
+
 //The GameError enum implement the Error trait, bound to the Debug + Display traits
 //Some enum's struct contain only a description, while other contain a lower-level error,
 //which is meant to be passed to the cause() function from the Error trait.
@@ -20,6 +22,7 @@ pub enum GameError {
     FileSystemError(String),
     UnknownError(String),
     ThreadPoolError(String),
+    ApplicationDirectoriesError(String, app_dirs::AppDirsError),
 }
 
 impl Display for GameError {
@@ -28,7 +31,8 @@ impl Display for GameError {
             &GameError::IOError(ref description, _) => write!(f, "IO error: {}", description),
             &GameError::FileSystemError(ref description) => write!(f, "File system error: {}", description),
             &GameError::UnknownError(ref description) => write!(f, "Unknown error: {}", description),
-            &GameError::ThreadPoolError(ref description) => write!(f, "ThreadPool error: {}", description)
+            &GameError::ThreadPoolError(ref description) => write!(f, "ThreadPool error: {}", description),
+            &GameError::ApplicationDirectoriesError(ref description, _) => write!(f, "Application directories error: {}", description),
         }
     }
 }
@@ -40,7 +44,7 @@ impl Error for GameError {
             &GameError::FileSystemError(_) => "FileSystemError",
             &GameError::UnknownError(_) => "UnknownError",
             &GameError::ThreadPoolError(_) => "ThreadPoolError",
-
+            &GameError::ApplicationDirectoriesError(_, _) => "ApplicationDirectoriesError",
         }
     }
     fn cause(&self) -> Option<&Error> {
@@ -56,7 +60,10 @@ impl Error for GameError {
             },
             &GameError::ThreadPoolError(_) => {
                 None
-            }
+            },
+            &GameError::ApplicationDirectoriesError(_, ref app_dir_error) => {
+                Some(app_dir_error)
+            },
         }
     }
 }
@@ -66,5 +73,11 @@ pub type GameResult<T> = Result<T, GameError>;
 impl From<FileError> for GameError {
     fn from(error: FileError) -> Self {
         GameError::IOError(format!("Error while dealing with file"), error)
+    }
+}
+
+impl From<app_dirs::AppDirsError> for GameError {
+    fn from(error: app_dirs::AppDirsError) -> Self {
+        GameError::ApplicationDirectoriesError(format!("Error while dealing with application directories"), error)
     }
 }

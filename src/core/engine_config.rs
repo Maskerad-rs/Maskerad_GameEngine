@@ -7,6 +7,23 @@ use core::engine_support_systems::error_handling::error::{GameResult, GameError}
 
 //TODO: EngineConfig need a default impl with default mapping of options.
 
+//Here what the file should look like :
+
+/*
+[graphic]
+key = value
+
+[physic]
+...
+
+[debug]
+flush = true/false
+
+[input]
+"move_up = "Z"
+...
+*/
+
 #[derive(Deserialize)]
 pub struct EngineConfig {
 
