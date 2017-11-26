@@ -113,7 +113,10 @@ impl Filesystem {
 
     fn get_absolute_path(&self, root_dir: RootDir, path: &str) -> PathBuf {
         let mut root = self.get_root_directory(root_dir);
-        root.push(Path::new(path));
+        //An empty &str can be used to delete a root directory (for tests). A bit hacky but....
+        if !path.is_empty() {
+            root.push(Path::new(path));
+        }
         root
     }
 }
@@ -245,7 +248,6 @@ mod linux_filesystem_test {
         let mut content = String::new();
         bufreader.read_to_string(&mut content);
         let mut lines = content.lines();
-        println!("{:?}", content);
         assert_eq!(lines.next(), Some("text_test"));
         assert_eq!(lines.next(), Some("text_append_test"));
         assert_eq!(lines.next(), None);
