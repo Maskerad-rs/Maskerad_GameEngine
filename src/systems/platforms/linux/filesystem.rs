@@ -265,14 +265,10 @@ mod linux_filesystem_test {
         filesystem.rmrf(RootDir::WorkingDirectory, "dir_test").expect("Couldn't delete dir");
         assert!(!filesystem.exists(RootDir::WorkingDirectory, "dir_test"));
 
-        filesystem.rmrf(RootDir::UserConfigRoot, "user_config_dir_test").expect("Couldn't delete user_config_dir_test dir");
-        filesystem.rmrf(RootDir::UserDataRoot, "user_data_dir_test").expect("Couldn't delete user_data_dir_test dir");
-        filesystem.rmrf(RootDir::UserLogRoot, "log_dir_test").expect("Couldn't delete log_dir_test dir");
-        filesystem.rmrf(RootDir::UserEngineConfigurationRoot, "engine_conf_dir_test").expect("Couldn't delete engine_conf_dir_test dir");
+        filesystem.rmrf(RootDir::UserConfigRoot, "").expect("Couldn't delete user config root dir");
+        filesystem.rmrf(RootDir::UserDataRoot, "").expect("Couldn't delete user data root dir");
         assert!(!filesystem.exists(RootDir::UserConfigRoot, "user_config_dir_test"));
         assert!(!filesystem.exists(RootDir::UserDataRoot, "user_data_dir_test"));
-        assert!(!filesystem.exists(RootDir::UserLogRoot, "log_dir_test"));
-        assert!(!filesystem.exists(RootDir::UserEngineConfigurationRoot, "engine_conf_dir_test"));
 
     }
 

@@ -10,6 +10,9 @@ use std::fs::DirEntry;
 
 use app_dirs;
 
+use toml::ser::Error as TomlSerializationError;
+use toml::de::Error as TomlDeserializationError;
+
 //The GameError enum implement the Error trait, bound to the Debug + Display traits
 //Some enum's struct contain only a description, while other contain a lower-level error,
 //which is meant to be passed to the cause() function from the Error trait.
@@ -23,6 +26,8 @@ pub enum GameError {
     UnknownError(String),
     ThreadPoolError(String),
     ApplicationDirectoriesError(String, app_dirs::AppDirsError),
+    DeserializationError(String, TomlDeserializationError),
+    SerializationError(String, TomlSerializationError),
 }
 
 impl Display for GameError {
@@ -33,6 +38,8 @@ impl Display for GameError {
             &GameError::UnknownError(ref description) => write!(f, "Unknown error: {}", description),
             &GameError::ThreadPoolError(ref description) => write!(f, "ThreadPool error: {}", description),
             &GameError::ApplicationDirectoriesError(ref description, _) => write!(f, "Application directories error: {}", description),
+            &GameError::DeserializationError(ref description, _) => write!(f, "TOML deserialization error: {}", description),
+            &GameError::SerializationError(ref description, _) => write!(f, "TOML serialization error: {}", description),
         }
     }
 }
@@ -45,6 +52,8 @@ impl Error for GameError {
             &GameError::UnknownError(_) => "UnknownError",
             &GameError::ThreadPoolError(_) => "ThreadPoolError",
             &GameError::ApplicationDirectoriesError(_, _) => "ApplicationDirectoriesError",
+            &GameError::DeserializationError(_, _) => "DeserializationError",
+            &GameError::SerializationError(_, _) => "SerializationError",
         }
     }
     fn cause(&self) -> Option<&Error> {
@@ -64,6 +73,12 @@ impl Error for GameError {
             &GameError::ApplicationDirectoriesError(_, ref app_dir_error) => {
                 Some(app_dir_error)
             },
+            &GameError::DeserializationError(_, ref deserialization_error) => {
+                Some(deserialization_error)
+            },
+            &GameError::SerializationError(_, ref serialization_error) => {
+                Some(serialization_error)
+            }
         }
     }
 }
@@ -79,5 +94,17 @@ impl From<FileError> for GameError {
 impl From<app_dirs::AppDirsError> for GameError {
     fn from(error: app_dirs::AppDirsError) -> Self {
         GameError::ApplicationDirectoriesError(format!("Error while dealing with application directories"), error)
+    }
+}
+
+impl From<TomlDeserializationError> for GameError {
+    fn from(error: TomlDeserializationError) -> Self {
+        GameError::DeserializationError(format!("Error while deserializing a TOML file"), error)
+    }
+}
+
+impl From<TomlSerializationError> for GameError {
+    fn from(error: TomlSerializationError) -> Self {
+        GameError::SerializationError(format!("Error while serializing a TOML file"), error)
     }
 }
