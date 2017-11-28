@@ -4,8 +4,8 @@
 use std::path::PathBuf;
 use std::collections::HashMap;
 
-use core::engine_support_systems::system_management::system_types::{VSystem, SystemType};
-use core::engine_support_systems::system_management::systems::loggers::VLog;
+use core::engine_support_systems::system_interfaces::system_types::{VSystem, SystemType};
+use core::engine_support_systems::system_interfaces::systems::loggers::VLog;
 
 use core::engine_support_systems::error_handling::error::{GameResult, GameError};
 

@@ -1,4 +1,4 @@
-use core::clock::Clock;
+use blacksmith_core::clock::Clock;
 use std::thread;
 use std::time::Duration;
 
@@ -8,14 +8,17 @@ use std::time::Duration;
     Will take care of the game loop
 */
 
-pub struct Game {
+
+//TODO: To create the blacksmith struct, you need to pass an EngineConfiguration struct as an arg.
+//TODO: The blacksmith struct will hold the various sub-systems (graphics, physics, ...).
+pub struct Blacksmith {
     game_over: bool,
     preferred_frame_rate_millisec: f64,
 }
 
-impl Game {
+impl Blacksmith {
     fn new() -> Self {
-        Game {
+        Blacksmith {
             game_over: false,
             preferred_frame_rate_millisec: 0.016, //16ms ~= 0.016 s ~= 60fps
         }

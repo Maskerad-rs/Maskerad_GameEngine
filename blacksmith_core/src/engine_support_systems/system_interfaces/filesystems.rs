@@ -6,10 +6,11 @@ use std::fmt;
 use std::sync::Arc;
 use std::sync::Mutex;
 
-use app_dirs;
 
-use core::engine_support_systems::error_handling::error::GameResult;
-use core::engine_support_systems::system_management::System;
+use game_infos::GameInfos;
+
+use engine_support_systems::error_handling::error::GameResult;
+use engine_support_systems::system_interfaces::System;
 
 //Enum used to specify the 'root' directory from where to write/delete/open dir/files
 #[derive(Debug, Copy, Clone)]
@@ -19,7 +20,7 @@ pub enum RootDir {
     UserConfigRoot,
     UserEngineConfigurationRoot,
     UserLogRoot,
-    //TODO: UserSaveRoot ?
+    UserSaveRoot,
 }
 
 
@@ -120,20 +121,7 @@ A filesystem must provide the following functionalities :
 */
 pub trait VFilesystem : System {
 
-    fn application_info(&self) -> &app_dirs::AppInfo;
-
-    fn user_data_root(&self) -> PathBuf;
-
-    fn user_config_root(&self) -> PathBuf;
-
-    fn user_engine_configuration_dir(&self) -> PathBuf;
-
-    fn user_log_dir(&self) -> PathBuf;
-
-    //TODO: user_saves_dir() ?
-
-
-    fn working_directory(&self) -> PathBuf;
+    fn application_info(&self) -> &GameInfos;
 
     //Open file at path with options
     fn open_with_options(&self, root_dir: RootDir, path: &str, open_options: &OpenOptions) -> GameResult<Box<VFile>>;

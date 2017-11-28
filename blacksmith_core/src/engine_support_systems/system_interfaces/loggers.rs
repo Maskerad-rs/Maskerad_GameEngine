@@ -1,5 +1,5 @@
-use core::engine_support_systems::error_handling::error::GameResult;
-use core::engine_support_systems::system_management::SystemType;
+use engine_support_systems::error_handling::error::GameResult;
+use engine_support_systems::system_interfaces::SystemType;
 use std::fmt;
 
 //TODO: Rewrite the Log trait

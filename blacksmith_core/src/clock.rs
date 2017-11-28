@@ -12,6 +12,15 @@ pub struct Clock {
 }
 
 impl Clock {
+    ///create a new non-paused clock, with the timer initialized to 0 and a time scale of 1.0
+    /// # Example
+    ///
+    /// ```
+    /// let clock = Clock::new();
+    /// assert!(!clock.paused);
+    /// assert_eq!(clock.time_scale, 1.0);
+    /// assert_eq!(clock.total_time, Duration::new(0, 0));
+    /// ```
     pub fn new() -> Self {
         Clock {
             total_time: Duration::new(0, 0),

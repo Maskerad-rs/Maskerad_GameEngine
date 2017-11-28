@@ -1,14 +1,10 @@
-extern crate cgmath;
-extern crate rand;
-extern crate rayon;
-extern crate remove_dir_all;
-extern crate app_dirs;
-extern crate toml;
-extern crate serde;
-#[macro_use]
-extern crate serde_derive;
+extern crate blacksmith_core;
+extern crate blacksmith_subsystems;
+extern crate blacksmith_gameplay;
 
-pub mod core;
-pub mod systems;
-pub mod gameplay;
-pub mod game_specific;
+pub mod game;
+
+pub use blacksmith_subsystems::platforms as systems;
+pub use blacksmith_core::engine_support_systems::system_interfaces;
+pub use blacksmith_core::engine_config as engine_configuration;
+pub use blacksmith_core::game_infos::GameInfos;

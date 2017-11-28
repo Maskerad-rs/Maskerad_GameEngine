@@ -8,13 +8,15 @@ use std::io;
 use std::env;
 
 use remove_dir_all;
-use app_dirs;
 
-use core::engine_support_systems::system_management::systems::filesystems::{VFilesystem, VMetadata, VFile, OpenOptions, RootDir};
-use core::engine_support_systems::error_handling::error::{GameResult, GameError};
-use core::engine_support_systems::system_management::System;
-use core::engine_support_systems::system_management::SystemType;
-use core::engine_support_systems::system_management::PlatformType;
+use blacksmith_core::game_infos::GameInfos;
+use blacksmith_core::game_directories::GameDirectories;
+
+use blacksmith_core::engine_support_systems::system_interfaces::filesystems::{VFilesystem, VMetadata, VFile, OpenOptions, RootDir};
+use blacksmith_core::engine_support_systems::error_handling::error::{GameResult, GameError};
+use blacksmith_core::engine_support_systems::system_interfaces::System;
+use blacksmith_core::engine_support_systems::system_interfaces::SystemType;
+use blacksmith_core::engine_support_systems::system_interfaces::PlatformType;
 
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -40,13 +42,8 @@ impl VMetadata for Metadata {
 
 #[derive(Debug)]
 pub struct Filesystem {
-    application_info: app_dirs::AppInfo,
-    working_directory_path: PathBuf,
-    user_data_path: PathBuf,
-    user_config_path: PathBuf,
-    user_engine_configuration_path: PathBuf,
-    user_log_path: PathBuf,
-    //TODO: user_save_path ?
+    game_infos: GameInfos,
+    game_directories: GameDirectories,
 }
 
 impl System for Filesystem {
@@ -67,52 +64,48 @@ impl Filesystem {
 
     //create the filesystem and the root directory (the current directory).
     //The working directory is changed to the root directory of a unix filesystem.
-    pub fn new(application_info: app_dirs::AppInfo) -> GameResult<Filesystem> {
-        //cache the current_directory path.
-        let working_directory_path = env::current_dir()?;
+    pub fn new(game_infos: GameInfos) -> GameResult<Filesystem> {
 
-        //create (if necessary) and cache the user data and config paths.
-        //Linux : /home/USER/.local/share/application_info.name
-        let user_data_path = app_dirs::app_root(app_dirs::AppDataType::UserData, &application_info)?;
-        //Linux : /home/USER/.config/application_info.name
-        let user_config_path = app_dirs::app_root(app_dirs::AppDataType::UserConfig, &application_info)?;
-       //Linux : /home/USER/.config/application_info.name/user_engine_configuration
-        let user_engine_configuration_path = app_dirs::app_dir(app_dirs::AppDataType::UserConfig, &application_info, "user_engine_configuration")?;
-        //Linux : /home/USER/.local/share/application_info.name/user_logs
-        let user_log_path = app_dirs::app_dir(app_dirs::AppDataType::UserData, &application_info, "user_logs")?;
+        let game_directories = GameDirectories::new(&game_infos)?;
 
-        Ok(Filesystem {
-            application_info,
-            working_directory_path,
-            user_data_path,
-            user_config_path,
-            user_engine_configuration_path,
-            user_log_path,
-        })
+        let filesystem = Filesystem {
+            game_infos,
+            game_directories
+        };
+
+        //TODO: make it explicite, our generate the structure when actuallt writing to it.
+        filesystem.mkdir(RootDir::UserEngineConfigurationRoot, "")?;
+        filesystem.mkdir(RootDir::UserLogRoot, "")?;
+        filesystem.mkdir(RootDir::UserSaveRoot, "")?;
+
+        Ok(filesystem)
     }
 
-    fn get_root_directory(&self, root_dir: RootDir) -> PathBuf {
+    fn get_root_directory(&self, root_dir: RootDir) -> &PathBuf {
         match root_dir {
             RootDir::UserConfigRoot => {
-                self.user_config_root()
+                &self.game_directories.user_config_path()
             },
             RootDir::UserDataRoot => {
-                self.user_data_root()
+                &self.game_directories.user_data_path()
             },
             RootDir::UserEngineConfigurationRoot => {
-                self.user_engine_configuration_dir()
+                &self.game_directories.engine_configuration_path()
             },
             RootDir::UserLogRoot => {
-                self.user_log_dir()
+                &self.game_directories.logs_path()
             },
             RootDir::WorkingDirectory => {
-                self.working_directory()
+                &self.game_directories.current_path()
+            },
+            RootDir::UserSaveRoot => {
+                &self.game_directories.saves_path()
             }
         }
     }
 
     fn get_absolute_path(&self, root_dir: RootDir, path: &str) -> PathBuf {
-        let mut root = self.get_root_directory(root_dir);
+        let mut root = self.get_root_directory(root_dir).clone();
         //An empty &str can be used to delete a root directory (for tests). A bit hacky but....
         if !path.is_empty() {
             root.push(Path::new(path));
@@ -123,28 +116,8 @@ impl Filesystem {
 
 impl VFilesystem for Filesystem {
 
-    fn application_info(&self) -> &app_dirs::AppInfo {
-        &self.application_info
-    }
-
-    fn user_data_root(&self) -> PathBuf {
-        self.user_data_path.clone()
-    }
-
-    fn user_config_root(&self) -> PathBuf {
-        self.user_config_path.clone()
-    }
-
-    fn user_engine_configuration_dir(&self) -> PathBuf {
-        self.user_engine_configuration_path.clone()
-    }
-
-    fn user_log_dir(&self) -> PathBuf {
-        self.user_log_path.clone()
-    }
-
-    fn working_directory(&self) -> PathBuf {
-        self.working_directory_path.clone()
+    fn application_info(&self) -> &GameInfos {
+        &self.game_infos
     }
 
     fn open_with_options(&self, root_dir: RootDir, path: &str, open_options: &OpenOptions) -> GameResult<Box<VFile>> {
@@ -159,6 +132,7 @@ impl VFilesystem for Filesystem {
 
     fn mkdir(&self, root_dir: RootDir, path: &str) -> GameResult<()> {
         let absolute_path = self.get_absolute_path(root_dir, path);
+        println!("creating directory {}", absolute_path.display());
         fs::DirBuilder::new().recursive(true).create(absolute_path.as_path()).map_err(GameError::from)
     }
 
@@ -172,14 +146,11 @@ impl VFilesystem for Filesystem {
     }
 
     fn rmrf(&self, root_dir: RootDir, path: &str) -> GameResult<()> {
-        let absolute_path = self.get_absolute_path(root_dir, path);
-        if absolute_path.is_dir() {
-            match remove_dir_all::remove_dir_all(absolute_path.as_path()) {
-                Ok(()) => Ok(()),
-                Err(e) => Err(GameError::IOError(format!("Error while deleting the directory ({})", absolute_path.display()), e)),
-            }
+        if self.exists(root_dir, path) {
+            let absolute_path = self.get_absolute_path(root_dir, path);
+            remove_dir_all::remove_dir_all(absolute_path.as_path()).map_err(GameError::from)
         } else {
-            Err(GameError::FileSystemError(format!("({}) is not a directory !, use rm instead if you want to delete a file.", absolute_path.display())))
+            Ok(())
         }
     }
 
@@ -216,13 +187,13 @@ mod linux_filesystem_test {
 
     #[test]
     fn filesystem_io_operations() {
-        let filesystem = Filesystem::new(app_dirs::AppInfo{name: "test_filesystem_blacksmith", author:"Malkaviel"}).unwrap();
+        let filesystem = Filesystem::new(GameInfos::new("test_filesystem_blacksmith", "Malkaviel")).expect("Couldn't create FS");
 
         filesystem.mkdir(RootDir::WorkingDirectory, "dir_test").unwrap();
         assert!(filesystem.exists(RootDir::WorkingDirectory, "dir_test"));
 
         //user logs
-        filesystem.mkdir(RootDir::UserLogRoot, "log_dir_test");
+        filesystem.mkdir(RootDir::UserLogRoot, "log_dir_test").unwrap();
         assert!(filesystem.exists(RootDir::UserLogRoot, "log_dir_test"));
         filesystem.create(RootDir::UserLogRoot, "log_dir_test/file_test.txt").expect("Couldn't create file in user log dir").write_all(b"text_test\n").expect("Couldn't create file and add 'text test'");
         filesystem.append(RootDir::UserLogRoot, "log_dir_test/file_test.txt").expect("Couldn't append to file in user log dir").write_all(b"text_append_test\n").expect("Couldn't append to file and add 'text_append-test'");
@@ -277,32 +248,29 @@ mod linux_filesystem_test {
 
     #[test]
     fn filesystem_directories() {
-        let filesystem = Filesystem::new(app_dirs::AppInfo{name: "test_filesystem_blacksmith", author:"Malkaviel"}).expect("Could not create FS");
-        assert_eq!(env::current_dir().expect("Couldn't get the current working directory"), filesystem.get_root_directory(RootDir::WorkingDirectory));
+        let filesystem = Filesystem::new(GameInfos::new("test_filesystem_blacksmith", "Malkaviel")).expect("Couldn't create FS");
+        assert_eq!(&env::current_dir().expect("Couldn't get the current working directory"), filesystem.get_root_directory(RootDir::WorkingDirectory));
     }
 
 
     #[test]
     fn filesystem_read_dir() {
-        let filesystem = Filesystem::new(app_dirs::AppInfo{name: "test_filesystem_blacksmith", author:"Malkaviel"}).expect("Couldn't create FS");
+        let filesystem = Filesystem::new(GameInfos::new("test_filesystem_blacksmith", "Malkaviel")).expect("Couldn't create FS");
         let mut entries = filesystem.read_dir(RootDir::WorkingDirectory, "src").unwrap();
         assert!(entries.next().is_some()); //lib.rs
-        assert!(entries.next().is_some()); //systems
-        assert!(entries.next().is_some()); //gameplay
-        assert!(entries.next().is_some()); //game_specific
-        assert!(entries.next().is_some()); //core
-        assert!(entries.next().is_none()); //nothing
+        assert!(entries.next().is_some()); //game.rs
+        assert!(entries.next().is_none());
     }
 
     #[test]
     fn filesystem_system_type() {
-        let filesystem = Filesystem::new(app_dirs::AppInfo{name: "test_filesystem_blacksmith", author:"Malkaviel"}).expect("Couldn't create FS.");
+        let filesystem = Filesystem::new(GameInfos::new("test_filesystem_blacksmith", "Malkaviel")).expect("Couldn't create FS");
         assert_eq!(filesystem.system_type(), SystemType::Filesystem);
     }
 
     #[test]
-    fn filesystem_platofrm_type() {
-        let filesystem = Filesystem::new(app_dirs::AppInfo{name: "test_filesystem_blacksmith", author:"Malkaviel"}).expect("Couldn't create FS.");
+    fn filesystem_platform_type() {
+        let filesystem = Filesystem::new(GameInfos::new("test_filesystem_blacksmith", "Malkaviel")).expect("Couldn't create FS");
         assert_eq!(filesystem.platform(), PlatformType::Linux);
     }
 }
