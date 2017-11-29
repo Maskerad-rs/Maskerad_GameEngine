@@ -12,11 +12,9 @@ fn engine_config_load_save_config() {
     let game_infos = GameInfos::new("test_integration_core_subsystems", "Malkaviel");
     let filesystem = Box::new(Filesystem::new(game_infos).unwrap()) as Box<VFilesystem>;
     let engine_configuration = EngineConfig::new(DebugOptions::new(false));
-    engine_configuration.save_config(&filesystem);
+    engine_configuration.save_config(&filesystem).unwrap();
 
     let new_engine_configuration = EngineConfig::load_config(&filesystem).unwrap();
     assert!(!new_engine_configuration.debug_options.flush);
-    //cleanup.
-    filesystem.rmrf(RootDir::UserDataRoot, "").unwrap();
-    filesystem.rmrf(RootDir::UserConfigRoot, "").unwrap();
+
 }
