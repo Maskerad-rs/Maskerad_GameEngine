@@ -4,7 +4,7 @@ version = "0.1.0"
 authors = ["Malkaviel - Maxime Capuano <maxime.capuano2@gmail.com>"]
 publish = false #don't publish it for the moment
 description = "Experimental game engine"
-license = "MIT/Apache-2.0"
+license = "MIT"
 repository = "https://github.com/Malkaviel/Blacksmith_GameEngine.git"
 
 [dependencies]

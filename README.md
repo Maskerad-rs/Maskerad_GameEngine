@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/Malkaviel/Blacksmith_GameEngine.svg?branch=master)](https://travis-ci.org/Malkaviel/Blacksmith_GameEngine)
 [![Build status](https://ci.appveyor.com/api/projects/status/4dowa31sf4mgmgrb/branch/master?svg=true)](https://ci.appveyor.com/project/Malkaviel/kindredengine/branch/master)
 [![codecov](https://codecov.io/gh/Malkaviel/Blacksmith_GameEngine/branch/master/graph/badge.svg)](https://codecov.io/gh/Malkaviel/Blacksmith_GameEngine)
-[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
 # WARNING
