@@ -1,0 +1,11 @@
+[package]
+name = "blacksmith_core"
+version = "0.1.0"
+authors = ["Maxime Capuano <maxime.capuano2@gmail.com>"]
+
+[dependencies]
+toml = "0.4"
+serde = "1.0"
+serde_derive = "1.0"
+cgmath = "0.15.0"
+rand = "0.3"
