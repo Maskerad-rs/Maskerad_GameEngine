@@ -16,10 +16,10 @@ impl Clock {
     /// # Example
     ///
     /// ```
-    /// let clock = Clock::new();
-    /// assert!(!clock.paused);
-    /// assert_eq!(clock.time_scale, 1.0);
-    /// assert_eq!(clock.total_time, Duration::new(0, 0));
+    /// let clock = blacksmith_core::clock::Clock::new();
+    /// assert!(!clock.is_paused());
+    /// assert_eq!(clock.time_scale(), 1.0);
+    /// assert_eq!(clock.duration(), std::time::Duration::new(0, 0));
     /// ```
     pub fn new() -> Self {
         Clock {
@@ -39,6 +39,10 @@ impl Clock {
 
     pub fn total_time_seconds(&self) -> f64 {
         self.total_time.as_secs() as f64 + (self.total_time.subsec_nanos() as f64 * 1e-9) as f64
+    }
+
+    pub fn duration(&self) -> Duration {
+        self.total_time
     }
 
     pub fn current_time(&self) -> Instant {

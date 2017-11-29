@@ -1,10 +1,10 @@
 extern crate blacksmith;
 
-use blacksmith::systems::linux::filesystem::Filesystem;
-use blacksmith::system_interfaces::filesystems::{VFilesystem, RootDir};
+use blacksmith::subsystems::platforms::linux::filesystem::Filesystem;
+use blacksmith::core::system_interfaces::filesystems::{VFilesystem, RootDir};
 
-use blacksmith::GameInfos;
-use blacksmith::engine_configuration::{DebugOptions, EngineConfig};
+use blacksmith::core::GameInfos;
+use blacksmith::core::engine_configuration::{EngineConfig, DebugOptions};
 
 #[test]
 fn engine_config_load_save_config() {
