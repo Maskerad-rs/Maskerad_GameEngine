@@ -1,3 +1,6 @@
+#![feature(unique)]
+#![feature(allocator_api)]
+
 pub mod engine_support_systems;
 pub mod engine_config;
 pub mod random;
