@@ -1,4 +1,3 @@
-
 use blacksmith_core::clock::Clock;
 use std::thread;
 use std::time::Duration;
