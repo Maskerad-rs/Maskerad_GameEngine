@@ -1,7 +1,6 @@
 language: rust
 sudo: false
 
-cache: cargo
 dist: trusty
 os:
   - linux
