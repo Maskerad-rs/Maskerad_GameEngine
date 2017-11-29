@@ -68,17 +68,10 @@ impl Filesystem {
 
         let game_directories = GameDirectories::new(&game_infos)?;
 
-        let filesystem = Filesystem {
+        Ok(Filesystem {
             game_infos,
             game_directories
-        };
-
-        //TODO: make it explicite, our generate the structure when actuallt writing to it.
-        filesystem.mkdir(RootDir::UserEngineConfigurationRoot, "")?;
-        filesystem.mkdir(RootDir::UserLogRoot, "")?;
-        filesystem.mkdir(RootDir::UserSaveRoot, "")?;
-
-        Ok(filesystem)
+        })
     }
 
     fn get_root_directory(&self, root_dir: RootDir) -> &PathBuf {
