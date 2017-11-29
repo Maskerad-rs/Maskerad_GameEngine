@@ -1,6 +1,6 @@
-[![Build Status](https://travis-ci.org/Malkaviel/Blacksmith_GameEngine.svg?branch=master)](https://travis-ci.org/Malkaviel/Blacksmith_GameEngine)
+[![Build Status](https://travis-ci.org/Malkaviel/Blacksmith.svg?branch=master)](https://travis-ci.org/Malkaviel/Blacksmith)
 [![Build status](https://ci.appveyor.com/api/projects/status/4dowa31sf4mgmgrb/branch/master?svg=true)](https://ci.appveyor.com/project/Malkaviel/kindredengine/branch/master)
-[![codecov](https://codecov.io/gh/Malkaviel/Blacksmith_GameEngine/branch/master/graph/badge.svg)](https://codecov.io/gh/Malkaviel/Blacksmith_GameEngine)
+[![codecov](https://codecov.io/gh/Malkaviel/Blacksmith/branch/master/graph/badge.svg)](https://codecov.io/gh/Malkaviel/Blacksmith)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 
