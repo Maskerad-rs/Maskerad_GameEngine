@@ -1,0 +1,6 @@
+[package]
+name = "maskerad_gameplay"
+version = "0.1.0"
+authors = ["Maxime Capuano <maxime.capuano2@gmail.com>"]
+
+[dependencies]

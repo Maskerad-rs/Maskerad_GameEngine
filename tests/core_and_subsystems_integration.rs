@@ -1,10 +1,17 @@
-extern crate blacksmith;
+// Copyright 2017 Maskerad Developers
+//
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
 
-use blacksmith::subsystems::platforms::linux::filesystem::Filesystem;
-use blacksmith::core::system_interfaces::filesystems::{VFilesystem, RootDir};
+extern crate maskerad;
 
-use blacksmith::core::GameInfos;
-use blacksmith::core::engine_configuration::{EngineConfig, DebugOptions};
+use maskerad::subsystems::platforms::linux::filesystem::Filesystem;
+use maskerad::core::system_interfaces::filesystems::{VFilesystem, RootDir};
+
+use maskerad::core::GameInfos;
+use maskerad::core::engine_configuration::{EngineConfig, DebugOptions};
 
 #[test]
 fn engine_config_load_save_config() {

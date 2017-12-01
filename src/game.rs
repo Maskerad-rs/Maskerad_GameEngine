@@ -1,4 +1,11 @@
-use blacksmith_core::clock::Clock;
+// Copyright 2017 Maskerad Developers
+//
+// Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
+// http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
+// http://opensource.org/licenses/MIT>, at your option. This file may not be
+// copied, modified, or distributed except according to those terms.
+
+use maskerad_core::clock::Clock;
 use std::thread;
 use std::time::Duration;
 
@@ -9,16 +16,16 @@ use std::time::Duration;
 */
 
 
-//TODO: To create the blacksmith struct, you need to pass an EngineConfiguration struct as an arg.
+//TODO: To create the game struct, you need to pass an EngineConfiguration struct as an arg.
 //TODO: The blacksmith struct will hold the various sub-systems (graphics, physics, ...).
-pub struct Blacksmith {
+pub struct Game {
     game_over: bool,
     preferred_frame_rate_millisec: f64,
 }
 
-impl Blacksmith {
+impl Game {
     fn new() -> Self {
-        Blacksmith {
+        Game {
             game_over: false,
             preferred_frame_rate_millisec: 0.016, //16ms ~= 0.016 s ~= 60fps
         }

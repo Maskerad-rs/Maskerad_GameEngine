@@ -1,15 +1,15 @@
 [package]
-name = "blacksmith"
+name = "maskerad"
 version = "0.1.0"
 authors = ["Malkaviel - Maxime Capuano <maxime.capuano2@gmail.com>"]
 publish = false #don't publish it for the moment
 description = "Multithreaded 3D game engine"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/Malkaviel/Blacksmith.git"
+repository = "https://github.com/Malkaviel/Maskerad_GameEngine.git"
 
 [dependencies]
-blacksmith_core = { path = "blacksmith_core"}
-blacksmith_subsystems = { path = "blacksmith_subsystems"}
-blacksmith_gameplay = { path = "blacksmith_gameplay"}
+maskerad_core = { path = "maskerad_core"}
+maskerad_subsystems = { path = "maskerad_subsystems"}
+maskerad_gameplay = { path = "maskerad_gameplay"}
 
 [workspace]
