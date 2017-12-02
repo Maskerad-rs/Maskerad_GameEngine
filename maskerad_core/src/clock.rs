@@ -23,7 +23,7 @@ impl Clock {
     /// # Example
     ///
     /// ```
-    /// let clock = blacksmith_core::clock::Clock::new();
+    /// let clock = maskerad_core::clock::Clock::new();
     /// assert!(!clock.is_paused());
     /// assert_eq!(clock.time_scale(), 1.0);
     /// assert_eq!(clock.duration(), std::time::Duration::new(0, 0));
