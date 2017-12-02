@@ -1,5 +1,4 @@
 # WARNING
-This is a personal project for learning game engine architecture, game engine implementation, and Rust.
 
 The specific purpose and general architecture is still not defined.
  
@@ -10,11 +9,9 @@ The specific purpose and general architecture is still not defined.
  http://arewegameyet.com/index.html
 
 # Maskerad
-[![Build Status](https://travis-ci.org/Malkaviel/Maskerad_GameEngine.svg?branch=master)](https://travis-ci.org/Malkaviel/Maskerad_GameEngine)
-[![Build status](https://ci.appveyor.com/api/projects/status/4dowa31sf4mgmgrb/branch/master?svg=true)](https://ci.appveyor.com/project/Malkaviel/kindredengine/branch/master)
-[![codecov](https://codecov.io/gh/Malkaviel/Maskerad-GameEngine/branch/master/graph/badge.svg)](https://codecov.io/gh/Malkaviel/Maskerad-GameEngine)
-
-
+[![Build Status](https://travis-ci.org/Maskerad-rs/Maskerad_GameEngine.svg?branch=master)](https://travis-ci.org/Maskerad-rs/Maskerad_GameEngine)
+[![Build status](https://ci.appveyor.com/api/projects/status/7r2oyqmqr28d3xya/branch/master?svg=true)](https://ci.appveyor.com/project/Malkaviel/maskerad-gameengine/branch/master)
+[![codecov](https://codecov.io/gh/Maskerad-rs/Maskerad_GameEngine/branch/master/graph/badge.svg)](https://codecov.io/gh/Maskerad-rs/Maskerad_GameEngine)
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
