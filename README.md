@@ -52,6 +52,11 @@ The engine must be extendable through plugin or modules. A plugin would be a
 game specific subsystem written in Lua, while a module would be a dynamically linked rust library to
 extend the "core" of the engine.
 
+#### First game specific subsystem: fighting game centric
+The first game specific subsystem will be a suite of tools suitable for "3D but 2D" fighting
+games. The levels and characters are in 3D, which save a lot of asset development time,
+ but the game logic in centered around a 2D plane where 2 opponent fight each other through
+ a frame-based fighting system.
 
 This engine borrows a lot of ideas from the, now discontinued, [Bitsquid engine](https://www.autodesk.com/products/stingray/overview).
 
