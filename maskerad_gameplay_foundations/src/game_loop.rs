@@ -6,20 +6,16 @@
 // copied, modified, or distributed except according to those terms.
 
 /*
+    Game programming patterns solution: Fixed update for physic and AI, variable update for rendering.
+    Game engine architecture: networked game loop.
+*/
+
+/*
 
 use maskerad_independence_layer::clock::Clock;
 use std::thread;
 use std::time::Duration;
 
-/*
-    The main struct :
-
-    Will take care of the game loop
-*/
-
-
-//TODO: To create the game struct, you need to pass an EngineConfiguration struct as an arg.
-//TODO: The blacksmith struct will hold the various sub-systems (graphics, physics, ...).
 pub struct Game {
     game_over: bool,
     preferred_frame_rate_millisec: f64,

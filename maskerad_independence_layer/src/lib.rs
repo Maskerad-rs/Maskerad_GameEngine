@@ -8,6 +8,9 @@
 extern crate rayon;
 extern crate maskerad_filesystem;
 
+extern crate time;
+pub mod clock;
+
 #[cfg(test)]
 mod maskerad_independence_layer_test {
     use super::*;

@@ -10,5 +10,17 @@ keywords = ["game-engine"]
 categories = ["Game engines"]
 
 [dependencies]
+#The cross-platform and more convenient filesystem
 maskerad_filesystem = { git = "https://github.com/Maskerad-rs/maskerad_filesystem" }
+
+# The cross-platform threading library
 rayon = "~1"
+
+# The vulkan rust wrapper (If we want to add Metal support, we need a graphics wrapper).
+vulkano = "~0.7"
+
+# The HTTP stuff
+# hyper = "~0.11"
+
+# Time utility
+time = "~0.1"

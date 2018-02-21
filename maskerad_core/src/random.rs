@@ -5,14 +5,7 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-//This 'random' struct is a pseudorandom number generator using the Xorshift random number generator
-//created by George Marsaglia, which also created the Mother-Of-All random number generator,
-//rivalizing the Mersenne Twister algoritm in term of speed, randomness and ease of implementation
-//(https://en.wikipedia.org/wiki/George_Marsaglia)
-//(https://en.wikipedia.org/wiki/Xorshift)
-//(https://en.wikipedia.org/wiki/Mersenne_Twister)
-
-use rand::{thread_rng, XorShiftRng, Rand, Rng, SeedableRng};
+use rand::{random, XorShiftRng, Rand, Rng, SeedableRng};
 use rand::distributions::range::SampleRange;
 
 //A wrapper of a Xorshift random number generator.
@@ -24,7 +17,7 @@ impl RandomNumber {
     //Generate a new Xorshift generator with random seed.
     pub fn new() -> Self {
 
-        let seed: [u32; 4] = [thread_rng().gen(), thread_rng().gen(), thread_rng().gen(), thread_rng().gen()];
+        let seed: [u32; 4] = [random(), random(), random(), random()];
 
         RandomNumber {
             generator: XorShiftRng::from_seed(seed),

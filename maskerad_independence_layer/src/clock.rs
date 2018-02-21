@@ -5,7 +5,7 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-use std::time::{Instant, Duration};
+use time::{Duration, PreciseTime};
 
 //A simple clock class, which can represent a real_time clock, a game clock or a special clock for an
 //animation system for example.
@@ -16,49 +16,69 @@ pub struct Clock {
     total_time: Duration,
     paused: bool,
     time_scale: f64,
+    framerate_single_step_ms: Duration,
+}
+
+impl Default for Clock {
+    fn default() -> Self {
+        Clock {
+            total_time: Duration::milliseconds(0),
+            paused: false,
+            time_scale: 1.0,
+            framerate_single_step_ms: Duration::milliseconds(16), //16ms == 0.016s == 1/60 == 60Hz.
+        }
+    }
 }
 
 impl Clock {
-    ///create a new non-paused clock, with the timer initialized to 0 and a time scale of 1.0
+    /// create a new non-paused clock, with the timer initialized to 0 and a time scale of 1.0
+    ///
     /// # Example
     ///
-    /// ```
-    /// let clock = maskerad_core::clock::Clock::new();
+    /// ```rust
+    /// use maskerad_independence_layer::clock::Clock;
+    ///
+    /// let clock = Clock::new();
     /// assert!(!clock.is_paused());
     /// assert_eq!(clock.time_scale(), 1.0);
-    /// assert_eq!(clock.duration(), std::time::Duration::new(0, 0));
+    /// assert_eq!(clock.total_time_ms(), 0);
+    ///
     /// ```
     pub fn new() -> Self {
+        Default::default()
+    }
+
+
+    pub fn with_single_step(framerate_single_step_ms: Duration) -> Self {
         Clock {
-            total_time: Duration::new(0, 0),
+            total_time: Duration::milliseconds(0),
             paused: false,
             time_scale: 1.0,
+            framerate_single_step_ms,
         }
     }
 
-    pub fn update(&mut self, delta_time: f64) {
+    //Duration is Copy.
+    pub fn update(&mut self, delta_time: Duration) {
+        //If the clock is "paused", we don't update the total time.
         if !self.paused {
-            let scaled_time = (delta_time as f64 * self.time_scale) as f64;
+            let mill_to_sec = delta_time.num_milliseconds() as f64 * 1e-3;
+            let scaled_sec = mill_to_sec * self.time_scale;
+            let scaled_duration = Duration::milliseconds((scaled_sec * 1e3) as i64);
+            let current_total_time = self.total_time;
 
-            self.total_time += Duration::from_millis((scaled_time * 1e3) as u64);
+            self.total_time = current_total_time + scaled_duration;
         }
     }
 
-    pub fn total_time_seconds(&self) -> f64 {
-        self.total_time.as_secs() as f64 + (self.total_time.subsec_nanos() as f64 * 1e-9) as f64
+    pub fn total_time_ms(&self) -> i64 {
+        self.total_time.num_milliseconds()
     }
 
-    pub fn duration(&self) -> Duration {
-        self.total_time
-    }
-
-    pub fn current_time(&self) -> Instant {
-        Instant::now()
-    }
-
-    pub fn calculate_delta_time_seconds(&self, begin_tick: Instant, end_tick: Instant) -> f64 {
-        let duration = end_tick.duration_since(begin_tick);
-        duration.as_secs() as f64 + (duration.subsec_nanos() as f64 * 1e-9) as f64
+    //PreciseTime is Copy.
+    //PreciseTime is a wrapper around a u64. And PreciseTime::now() is precise_time_ns() under the hood.
+    pub fn current_time() -> PreciseTime {
+        PreciseTime::now()
     }
 
     pub fn is_paused(&self) -> bool {
@@ -79,8 +99,12 @@ impl Clock {
 
     pub fn single_step(&mut self) {
         if self.paused {
-            let scaled_time = (0.016 * self.time_scale) as f64;
-            self.total_time += Duration::from_millis((scaled_time * 1e3) as u64);
+            let mill_to_sec = self.framerate_single_step_ms.num_milliseconds() as f64 * 1e-3;
+            let scaled_sec = mill_to_sec * self.time_scale;
+            let scaled_duration = Duration::milliseconds((scaled_sec * 1e3) as i64);
+            let current_total_time = self.total_time;
+
+            self.total_time = current_total_time + scaled_duration;
         }
     }
 }
@@ -109,27 +133,27 @@ mod clock_tests {
         let mut clock = Clock::new();
         clock.set_paused(true);
         clock.single_step();
-        assert!(clock.total_time_seconds() >= 0.016);
+        assert!(clock.total_time_ms() >= 16);
         clock.single_step();
-        assert!(clock.total_time_seconds() >= 0.032);
+        assert!(clock.total_time_ms() >= 32);
     }
 
     #[test]
     fn clock_calculate_dt_second() {
         let mut clock = Clock::new();
-        let old_time = clock.current_time();
-        thread::sleep(Duration::from_secs(1));
-        let new_time = clock.current_time();
-        let dt = clock.calculate_delta_time_seconds(old_time, new_time);
-        assert!(dt >= 1.0);
+        let old_time = Clock::current_time();
+        thread::sleep(Duration::seconds(1).to_std().unwrap());
+        let new_time = Clock::current_time();
+        let dt = old_time.to(new_time);
+        assert!(dt.num_milliseconds() >= 1000);
     }
 
     #[test]
     fn clock_update() {
         let mut clock = Clock::new();
-        clock.update(0.016); // + 0.016
+        clock.update(Duration::milliseconds(16)); // + 0.016
         clock.set_time_scale(2.0);
-        clock.update(0.016); // + 0.032
-        assert!(clock.total_time_seconds() >= 0.048);
+        clock.update(Duration::milliseconds(16)); // + 0.032
+        assert!(clock.total_time_ms() >= 48);
     }
 }

@@ -10,6 +10,25 @@ keywords = ["game-engine"]
 categories = ["Game engines"]
 
 [dependencies]
-cgmath = "~0.15.0"
-rand = "~0.3"
+#The math library
+cgmath = "~0.15"
+
+#The RNG utility
+rand = "~0.4"
+
+#The stack allocators
 maskerad_memory_allocators = "~5"
+
+#TOML serialization/deserialization (for game engine configuration). Used with the maskerad filesystem to check a specific repository.
+toml = "~0.4"
+
+#MessagePack serialization/deserialization (for data transmission over the network).
+rmp = "~0.8"
+
+#csv serialization/deserialization
+#csv = "~0.15"
+
+#logging and debug printing (interface). Use fern (in executable program) for actual implementation.
+log = "~0.4"
+
+# The asynchronous network and filesystem I/O stuff (tokio, futures, mio...)
