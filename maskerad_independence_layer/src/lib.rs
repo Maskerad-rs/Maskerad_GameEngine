@@ -5,13 +5,11 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-pub mod random;
-
-extern crate cgmath;
-extern crate rand;
+extern crate rayon;
+extern crate maskerad_filesystem;
 
 #[cfg(test)]
-mod maskerad_core_test {
+mod maskerad_independence_layer_test {
     use super::*;
 
     #[test]

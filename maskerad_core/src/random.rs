@@ -1,4 +1,4 @@
-// Copyright 2017 Maskerad Developers
+// Copyright 2017-2018 Maskerad Developers
 //
 // Licensed under the Apache License, Version 2.0, <LICENSE-APACHE or
 // http://apache.org/licenses/LICENSE-2.0> or the MIT license <LICENSE-MIT or
@@ -11,6 +11,7 @@
 //(https://en.wikipedia.org/wiki/George_Marsaglia)
 //(https://en.wikipedia.org/wiki/Xorshift)
 //(https://en.wikipedia.org/wiki/Mersenne_Twister)
+
 use rand::{thread_rng, XorShiftRng, Rand, Rng, SeedableRng};
 use rand::distributions::range::SampleRange;
 

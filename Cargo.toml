@@ -1,15 +1,43 @@
 [package]
-name = "maskerad"
-version = "0.1.0"
-authors = ["Malkaviel - Maxime Capuano <maxime.capuano2@gmail.com>"]
+name = "maskerad_game_engine"
+version = "0.1.0" #don't forget to update html doc root
+authors = ["Maskerad Developers <maskerad-rs.organization@protonmail.com>"]
 publish = false #don't publish it for the moment
-description = "Multithreaded 3D game engine"
+description = "3D game engine"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/Malkaviel/Maskerad_GameEngine.git"
+repository = "https://github.com/Malkaviel/Maskerad_GameEngine"
+keywords = ["game-engine"]
+categories = ["Game engines"]
+readme = "README_CRATE.md"
+
+[badges]
+
+appveyor = { repository = "Malkaviel/maskerad-gameengine", branch = "master", service = "github" }
+travis-ci = { repository = "Maskerad-rs/Maskerad_GameEngine", branch = "master" }
+codecov = { repository = "Maskerad-rs/Maskerad_GameEngine", branch = "master", service = "github" }
+is-it-maintained-issue-resolution = { repository = "Maskerad-rs/Maskerad_GameEngine" }
+is-it-maintained-open-issues = { repository = "Maskerad-rs/Maskerad_GameEngine" }
+maintenance = { status = "actively-developed" }
+
 
 [dependencies]
+maskerad_gameplay_foundations = { path = "maskerad_gameplay_foundations"}
+#------------------------------------------------------------------------
+maskerad_front_end = { path = "maskerad_front_end" }
+maskerad_visual_effects = { path = "maskerad_visual_effects" }
+maskerad_rendering_optimizations = { path = "maskerad_rendering_optimizations" }
+maskerad_low_level_renderer = { path = "maskerad_low_level_renderer" }
+maskerad_animations = { path = "maskerad_animations" }
+maskerad_physics = { path = "maskerad_physics" }
+maskerad_audio = { path = "maskerad_audio" }
+
+maskerad_inputs = { path = "maskerad_inputs" }
+maskerad_debugging = { path = "maskerad_debugging" }
+maskerad_network = { path = "maskerad_network" }
+#------------------------------------------------------------------------
+maskerad_resource_management = { path = "maskerad_resource_management" }
+#------------------------------------------------------------------------
 maskerad_core = { path = "maskerad_core"}
-maskerad_subsystems = { path = "maskerad_subsystems"}
-maskerad_gameplay = { path = "maskerad_gameplay"}
+maskerad_independence_layer = { path = "maskerad_independence_layer"}
 
 [workspace]

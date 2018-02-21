@@ -1,15 +1,12 @@
 [package]
-name = "maskerad_core"
+name = "maskerad_visual_effects"
 version = "0.1.0" #don't forget to update html doc root
 publish = false #don't publish for now
 authors = ["Maskerad developers <maskerad-rs.organization@protonmail.com>"]
-description = "The core systems of the maskerad game engine."
+description = "VFX module of the maskerad game engine."
 license = "MIT/Apache-2.0"
 repository = "https://github.com/Maskerad-rs/Maskerad_GameEngine"
 keywords = ["game-engine"]
 categories = ["Game engines"]
 
 [dependencies]
-cgmath = "~0.15.0"
-rand = "~0.3"
-maskerad_memory_allocators = "~5"

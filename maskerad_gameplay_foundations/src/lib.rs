@@ -5,13 +5,12 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-pub mod random;
-
-extern crate cgmath;
-extern crate rand;
+pub mod artificial_intelligence;
+pub mod event;
+pub mod scripting;
 
 #[cfg(test)]
-mod maskerad_core_test {
+mod maskerad_gameplay_foundations_test {
     use super::*;
 
     #[test]
