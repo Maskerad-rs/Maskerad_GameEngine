@@ -5,23 +5,7 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-extern crate rayon;
-extern crate maskerad_filesystem;
-
-#[macro_use]
-extern crate log;
-extern crate remove_dir_all;
-
-extern crate time;
-pub mod clock;
 pub mod filesystem;
-
-#[cfg(test)]
-mod maskerad_independence_layer_test {
-    use super::*;
-
-    #[test]
-    fn test() {
-        assert_eq!(1+1, 2);
-    }
-}
+pub mod filesystem_error;
+pub mod game_directories;
+pub mod open_options;

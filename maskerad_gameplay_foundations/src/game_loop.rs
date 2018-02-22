@@ -7,7 +7,12 @@
 
 /*
     Game programming patterns solution: Fixed update for physic and AI, variable update for rendering.
-    Game engine architecture: networked game loop.
+    Game engine architecture: networked and multithreaded game loop.
+
+    /*
+        TODO
+        Tokio + Future + Future_cpupool
+    */
 */
 
 /*

@@ -25,7 +25,7 @@ impl Default for Clock {
             total_time: Duration::milliseconds(0),
             paused: false,
             time_scale: 1.0,
-            framerate_single_step_ms: Duration::milliseconds(16), //16ms == 0.016s == 1/60 == 60Hz.
+            framerate_single_step_ms: Duration::milliseconds(16), //16ms == 0.016s == 1/60 == 60Hz == 60 FPS.
         }
     }
 }
