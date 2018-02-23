@@ -31,4 +31,9 @@ rmp = "~0.8"
 #logging and debug printing (interface). Use fern (in executable program) for actual implementation.
 log = "~0.4"
 
-# The asynchronous network and filesystem I/O stuff (tokio, futures, mio...)
+# The platform independence layer of the maskerad game engine
+maskerad_independence_layer = { path = "../maskerad_independence_layer" }
+
+# Serde support
+serde = "~1.0"
+serde_derive = "~1.0"

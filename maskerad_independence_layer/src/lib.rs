@@ -5,9 +5,6 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-extern crate rayon;
-extern crate maskerad_filesystem;
-
 #[macro_use]
 extern crate log;
 extern crate remove_dir_all;

@@ -5,24 +5,23 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-extern crate maskerad_gameplay_foundations;
+pub extern crate maskerad_gameplay_foundations as gameplay;
 
-extern crate maskerad_front_end;
-extern crate maskerad_visual_effects;
-extern crate maskerad_rendering_optimizations;
-extern crate maskerad_low_level_renderer;
-extern crate maskerad_animations;
-extern crate maskerad_physics;
+pub extern crate maskerad_front_end as gui;
+pub extern crate maskerad_visual_effects as vfx;
+pub extern crate maskerad_rendering_optimizations as optimizations;
+pub extern crate maskerad_low_level_renderer as renderer;
+pub extern crate maskerad_animations as animations;
+pub extern crate maskerad_physics as physics;
 
-extern crate maskerad_inputs;
-extern crate maskerad_audio;
-extern crate maskerad_network;
-extern crate maskerad_debugging;
+pub extern crate maskerad_inputs as inputs;
+pub extern crate maskerad_audio as audio;
+pub extern crate maskerad_network as network;
+pub extern crate maskerad_debugging as debugging;
 
-extern crate maskerad_resource_management;
-
-extern crate maskerad_core;
-extern crate maskerad_independence_layer;
+pub extern crate maskerad_resource_management as resource_management;
+pub extern crate maskerad_core as core;
+pub extern crate maskerad_independence_layer as independence_layer;
 
 #[cfg(test)]
 mod maskerad_game_engine_test {

@@ -39,22 +39,24 @@ pub struct Filesystem {
 }
 
 impl Filesystem {
-    pub fn new(game_name: &str, game_author: &str) -> FileSystemResult<Self> {
-        debug!("Creating a new Filesystem with the game name {}, created by {}", game_name, game_author);
-        let directories = GameDirectories::new(game_name, game_author)?;
+    pub fn new<S>(game_name: S, game_author: S) -> FileSystemResult<Self> where
+        S: AsRef<str>
+    {
+        debug!("Creating a new Filesystem with the game name {}, created by {}", game_name.as_ref(), game_author.as_ref());
+        let directories = GameDirectories::new(game_name.as_ref(), game_author.as_ref())?;
 
         Ok(Filesystem {
             directories,
         })
     }
 
-    pub fn get_absolute_path<P: AsRef<Path>>(&self, path: P) -> FileSystemResult<PathBuf> {
+    pub fn get_absolute_path<P: AsRef<Path>>(path: P) -> FileSystemResult<PathBuf> {
         debug!("Getting the absolute path of {}", path.as_ref().display());
         fs::canonicalize(path.as_ref()).map_err(|io_error| FileSystemError::from(io_error))
     }
 
     //Open file at path with options
-    fn open_with_options<P, O>(&self, path: P, open_options: O) -> FileSystemResult<File> where
+    fn open_with_options<P, O>(path: P, open_options: O) -> FileSystemResult<File> where
         P: AsRef<Path>,
         O: AsRef<OpenOptions>,
     {
@@ -66,16 +68,16 @@ impl Filesystem {
     }
 
     //Open file at path to read
-    pub fn open<P: AsRef<Path>>(&self, path: P) -> FileSystemResult<BufReader<File>> {
+    pub fn open<P: AsRef<Path>>(path: P) -> FileSystemResult<BufReader<File>> {
         debug!("Opening file at path {}", path.as_ref().display());
-        let buf = self.open_with_options(path.as_ref(), OpenOptions::new().set_read(true))?;
+        let buf = Filesystem::open_with_options(path.as_ref(), OpenOptions::new().set_read(true))?;
         Ok(BufReader::new(buf))
     }
 
     //Open file at path for writing, truncates if file already exist
-    pub fn create<P: AsRef<Path>>(&self, path: P) -> FileSystemResult<BufWriter<File>> {
+    pub fn create<P: AsRef<Path>>(path: P) -> FileSystemResult<BufWriter<File>> {
         debug!("Creating/truncating file at path {}", path.as_ref().display());
-        let buf = self.open_with_options(
+        let buf = Filesystem::open_with_options(
             path.as_ref(),
             OpenOptions::new()
                 .set_create(true)
@@ -86,9 +88,9 @@ impl Filesystem {
     }
 
     //Open the file at path for appending, creating it if necessary
-    pub fn append<P: AsRef<Path>>(&self, path: P) -> FileSystemResult<BufWriter<File>> {
+    pub fn append<P: AsRef<Path>>(path: P) -> FileSystemResult<BufWriter<File>> {
         debug!("Appending/Creating file at path {}", path.as_ref().display());
-        let buf = self.open_with_options(
+        let buf = Filesystem::open_with_options(
             path.as_ref(),
             OpenOptions::new()
                 .set_create(true)
@@ -99,7 +101,7 @@ impl Filesystem {
     }
 
     //create directory at path
-    pub fn mkdir<P: AsRef<Path>>(&self, path: P) -> FileSystemResult<()> {
+    pub fn mkdir<P: AsRef<Path>>(path: P) -> FileSystemResult<()> {
         debug!("Creating directory at path {}", path.as_ref().display());
         fs::DirBuilder::new()
             .recursive(true)
@@ -108,7 +110,7 @@ impl Filesystem {
     }
 
     //remove a file
-    pub fn rm<P: AsRef<Path>>(&self, path: P) -> FileSystemResult<()> {
+    pub fn rm<P: AsRef<Path>>(path: P) -> FileSystemResult<()> {
         if path.as_ref().is_dir() {
             debug!("Removing empty directory at path {}", path.as_ref().display());
             fs::remove_dir(path.as_ref()).map_err(|io_error| FileSystemError::from(io_error))
@@ -119,13 +121,13 @@ impl Filesystem {
     }
 
     //remove file or directory and all its contents
-    pub fn rmrf<P: AsRef<Path>>(&self, path: P) -> FileSystemResult<()> {
+    pub fn rmrf<P: AsRef<Path>>(path: P) -> FileSystemResult<()> {
         debug!("Removing file/dir at path {}", path.as_ref().display());
         remove_dir_all::remove_dir_all(path.as_ref()).map_err(|io_error| FileSystemError::from(io_error))
     }
 
     //Retrieve all file entries in the given directory (recursive).
-    pub fn read_dir<P: AsRef<Path>>(&self, path: P) -> FileSystemResult<fs::ReadDir> {
+    pub fn read_dir<P: AsRef<Path>>(path: P) -> FileSystemResult<fs::ReadDir> {
         debug!("Getting all entries in the directory at path {}", path.as_ref().display());
         fs::read_dir(path.as_ref()).map_err(|io_error| FileSystemError::from(io_error))
     }
@@ -133,9 +135,9 @@ impl Filesystem {
     fn path(&self, root_dir: RootDir) -> FileSystemResult<PathBuf> {
         debug!("Getting the full path of the {}.", root_dir);
         match self.directories.get(&root_dir) {
-            Some(pathbuf_ref) => {
+            Some(path_ref) => {
                 trace!("Found the path of the {}.", root_dir);
-                Ok(pathbuf_ref.clone())
+                Ok(path_ref.to_path_buf())
             },
             None => {
                 error!("Could not find the path of the {} !", root_dir);
@@ -175,7 +177,7 @@ mod filesystem_test {
             .construct_path_from_root(RootDir::WorkingDirectory, "dir_test")
             .expect("Could not create current_dir_dir_test PathBuf");
 
-        fs.mkdir(current_dir_dir_test.as_path())
+        Filesystem::mkdir(current_dir_dir_test.as_path())
             .expect("Could not create dir with current_dir_dir_test as path");
         assert!(current_dir_dir_test.exists());
 
@@ -183,7 +185,7 @@ mod filesystem_test {
         let user_log_dir_test = fs
             .construct_path_from_root(RootDir::EngineLogRoot, "log_dir_test")
             .expect("Could not create user_log_dir_test");
-        fs.mkdir(user_log_dir_test.as_path())
+        Filesystem::mkdir(user_log_dir_test.as_path())
             .expect("Could not create dir with user_log_dir_test as path");
         assert!(user_log_dir_test.exists());
 
@@ -191,75 +193,9 @@ mod filesystem_test {
             .construct_path_from_root(RootDir::EngineLogRoot, "log_dir_test/file_test.txt")
             .expect("Could not create file_test.txt");
         let mut log_dir_bufwriter =
-            fs.create(file_test.as_path()).expect("Could not create log_dir_test/file_test.txt");
+            Filesystem::create(file_test.as_path()).expect("Could not create log_dir_test/file_test.txt");
 
         log_dir_bufwriter.write_all(b"text_test\n").unwrap();
-
-        /*
-        let async_dir = game_dirs
-            .construct_path_from_root(RootDir::UserLogRoot, "async_dir")
-            .expect("Could not create async_dir");
-        mkdir(async_dir.as_path()).expect("Could not create dir with async_dir as path");
-        assert!(async_dir.exists());
-
-        //test async functionalities.
-        let thread_pool = Configuration::new()
-            .build()
-            .expect("Could not create the thread pool.");
-
-        let async_log_dir_test = game_dirs
-            .construct_path_from_root(RootDir::UserLogRoot, "async_dir/async_log_dir_test.txt")
-            .expect("Could not create async_log_dir_test");
-        {
-            let mut log_bufwriter =
-                create(async_log_dir_test.as_path()).expect("Could not create the bufwriter");
-
-
-            thread_pool.install(|| {
-                log_bufwriter.write(b"test_async_text_1\n").unwrap()
-            });
-
-            thread_pool.install(|| {
-                log_bufwriter.write(b"test_async_text_2\n").unwrap()
-            });
-
-            thread_pool.install(|| {
-                log_bufwriter.write(b"test_async_text_3\n").unwrap()
-            });
-
-        } //bufwriter dropped here, all the write calls will be executed.
-
-
-        let mut bufreader_async =
-            open(async_log_dir_test.as_path()).expect("Could not create bufreader");
-        let mut content = String::new();
-
-
-        thread_pool.install(|| {
-            bufreader_async.read_to_string(&mut content).unwrap()
-        });
-
-        let mut lines = content.lines();
-        assert_eq!(lines.next(), Some("test_async_text_1"));
-        assert_eq!(lines.next(), Some("test_async_text_2"));
-        assert_eq!(lines.next(), Some("test_async_text_3"));
-        assert_eq!(lines.next(), None);
-
-        //Metadata
-        let file_metadata = async_log_dir_test
-            .metadata()
-            .expect("Couldn't get metadata");
-        assert!(file_metadata.is_file());
-        assert!(!file_metadata.is_dir());
-        assert!(file_metadata.len() > 0);
-
-        //remove
-        rm(async_log_dir_test.as_path())
-            .expect("Couldn't delete the file : async_dir/async_log_dir_test.txt");
-        assert!(!async_log_dir_test.exists());
-        rmrf(current_dir_dir_test.as_path()).expect("Couldn't delete dir");
-        assert!(!current_dir_dir_test.exists());
-        */
     }
 
     #[test]
@@ -270,7 +206,7 @@ mod filesystem_test {
         let src_dir = fs
             .construct_path_from_root(RootDir::WorkingDirectory, "src")
             .unwrap();
-        let mut entries = fs.read_dir(src_dir).unwrap();
+        let mut entries = Filesystem::read_dir(src_dir).unwrap();
         assert!(entries.next().is_some());
     }
 }

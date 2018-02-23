@@ -7,7 +7,7 @@
 
 use std::collections::HashMap;
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::env;
 use filesystem::filesystem_error::{FileSystemError, FileSystemResult};
 use std::fmt;
@@ -53,8 +53,10 @@ impl fmt::Display for RootDir {
 pub struct GameDirectories(HashMap<RootDir, PathBuf>);
 
 impl GameDirectories {
-    pub fn new(game_name: &str, game_author: &str) -> FileSystemResult<Self> {
-        debug!("Creating a new GameDirectories with a game name of {}, created by {}", game_name, game_author);
+    pub fn new<S>(game_name: S, game_author: S) -> FileSystemResult<Self> where
+        S: AsRef<str>
+    {
+        debug!("Creating a new GameDirectories with a game name of {}, created by {}", game_name.as_ref(), game_author.as_ref());
         trace!("Creating the user config path...");
         let mut user_config = PathBuf::new();
         trace!("Creating the user data path...");
@@ -65,8 +67,8 @@ impl GameDirectories {
             trace!("Trying to get the value of the APPDATA environment variable.");
             let appdata = env::var("APPDATA")?;
 
-            user_config = PathBuf::from(format!("{}\'{}\'{}", appdata.as_str(), game_author, game_name));
-            user_data = PathBuf::from(format!("{}\'{}\'{}", appdata.as_str(), game_author, game_name));
+            user_config = PathBuf::from(format!("{}\'{}\'{}", appdata.as_str(), game_author.as_ref(), game_name.as_ref()));
+            user_data = PathBuf::from(format!("{}\'{}\'{}", appdata.as_str(), game_author.as_ref(), game_name.as_ref()));
         } else if cfg!(target_os = "macos") {
             trace!("OS: MacOS.");
             unimplemented!();
@@ -75,8 +77,8 @@ impl GameDirectories {
             trace!("Trying to get the value of the HOME environment variable.");
             let home = env::var("HOME")?;
 
-            user_config = PathBuf::from(format!("{}/.config/{}/{}", home.as_str(), game_author, game_name));
-            user_data = PathBuf::from(format!("{}/.local/share/{}/{}", home.as_str(), game_author, game_name));
+            user_config = PathBuf::from(format!("{}/.config/{}/{}", home.as_str(), game_author.as_ref(), game_name.as_ref()));
+            user_data = PathBuf::from(format!("{}/.local/share/{}/{}", home.as_str(), game_author.as_ref(), game_name.as_ref()));
         }
 
         trace!("User config path: {}", user_config.display());
@@ -111,7 +113,14 @@ impl GameDirectories {
         Ok(GameDirectories(directories))
     }
 
-    pub fn get(&self, k: &RootDir) -> Option<&PathBuf> {
-        self.0.get(k)
+    pub fn get(&self, k: &RootDir) -> Option<&Path> {
+        match self.0.get(k) {
+            Some(pathbuf) => {
+                Some(pathbuf.as_path())
+            },
+            None => {
+                None
+            }
+        }
     }
 }

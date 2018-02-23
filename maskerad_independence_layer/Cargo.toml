@@ -10,14 +10,16 @@ keywords = ["game-engine"]
 categories = ["Game engines"]
 
 [dependencies]
-#The cross-platform and more convenient filesystem
-maskerad_filesystem = { git = "https://github.com/Maskerad-rs/maskerad_filesystem" }
-
-# The cross-platform threading library
-rayon = "~1"
+# The cross-platform threading library (with future support)
+futures-cpupool = "~0.1"
 
 # The vulkan rust wrapper (If we want to add Metal support, we need a graphics wrapper).
 vulkano = "~0.7"
+
+# The TCP/UDP stuff (with future support)
+tokio = "~0.1"
+tokio-io = "~0.1"
+futures = "~0.1"
 
 # The HTTP stuff
 # hyper = "~0.11"
@@ -25,10 +27,10 @@ vulkano = "~0.7"
 # Time utility
 time = "~0.1"
 
-#remove_dir_all windows workaround
+#remove_dir_all Windows workaround
 remove_dir_all = "~0.3"
 
-#serde support for various structures
+#serde support for various structures (its not
 serde = { version = "~1.0", optional = true, features = ["derive"] }
 
 #logging support
