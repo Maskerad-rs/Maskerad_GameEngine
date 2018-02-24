@@ -5,12 +5,5 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-#[cfg(test)]
-mod maskerad_independence_layer_test {
-    use super::*;
-
-    #[test]
-    fn test() {
-        assert_eq!(1+1, 2);
-    }
-}
+pub mod engine_config;
+pub mod engine_config_error;

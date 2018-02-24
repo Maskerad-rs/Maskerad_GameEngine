@@ -8,7 +8,7 @@
 use std::io::{Read, Write};
 use std::path::PathBuf;
 use toml;
-use engine_config_error::{EngineConfigError, EngineConfigResult};
+use engine_configuration::engine_config_error::{EngineConfigError, EngineConfigResult};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EngineConfig {

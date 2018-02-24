@@ -1,11 +1,11 @@
 extern crate maskerad_game_engine;
 
 //Filesystem stuff.
-use maskerad_game_engine::independence_layer::filesystem::filesystem::Filesystem;
-use maskerad_game_engine::independence_layer::filesystem::game_directories::RootDir;
+use maskerad_game_engine::core::filesystem::filesystem::Filesystem;
+use maskerad_game_engine::core::filesystem::game_directories::RootDir;
 
 //EngineConfig stuff.
-use maskerad_game_engine::core::engine_config::EngineConfig;
+use maskerad_game_engine::core::engine_configuration::engine_config::EngineConfig;
 
 use std::io::BufReader;
 

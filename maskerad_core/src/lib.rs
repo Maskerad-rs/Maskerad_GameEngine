@@ -6,8 +6,16 @@
 // copied, modified, or distributed except according to those terms.
 
 pub mod random;
-pub mod engine_config;
-pub mod engine_config_error;
+pub mod clock;
+pub mod engine_configuration;
+pub mod filesystem;
+
+extern crate time;
+
+extern crate remove_dir_all;
+
+#[macro_use]
+extern crate log;
 
 extern crate toml;
 

@@ -24,14 +24,6 @@ futures = "~0.1"
 # The HTTP stuff
 # hyper = "~0.11"
 
-# Time utility
-time = "~0.1"
-
-#remove_dir_all Windows workaround
-remove_dir_all = "~0.3"
-
-#serde support for various structures (its not
+#serde support for various structures
 serde = { version = "~1.0", optional = true, features = ["derive"] }
 
-#logging support
-log = "~0.4"

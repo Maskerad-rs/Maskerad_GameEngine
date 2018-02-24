@@ -37,3 +37,9 @@ maskerad_independence_layer = { path = "../maskerad_independence_layer" }
 # Serde support
 serde = "~1.0"
 serde_derive = "~1.0"
+
+# Time utility
+time = "~0.1"
+
+#remove_dir_all Windows workaround
+remove_dir_all = "~0.3"
