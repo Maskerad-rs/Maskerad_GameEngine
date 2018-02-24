@@ -22,14 +22,3 @@ pub extern crate maskerad_debugging as debugging;
 pub extern crate maskerad_resource_management as resource_management;
 pub extern crate maskerad_core as core;
 pub extern crate maskerad_independence_layer as independence_layer;
-
-#[cfg(test)]
-mod maskerad_game_engine_test {
-    use super::*;
-
-    #[test]
-    fn test() {
-        assert_eq!(1+1, 2);
-    }
-}
-

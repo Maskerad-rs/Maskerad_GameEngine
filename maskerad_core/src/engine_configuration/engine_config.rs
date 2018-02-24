@@ -12,26 +12,26 @@ use engine_configuration::engine_config_error::{EngineConfigError, EngineConfigR
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EngineConfig {
-    language: String,
+    locale: String,
     script: Option<String>,
 }
 
 impl Default for EngineConfig {
     fn default() -> Self {
         EngineConfig {
-            language: String::from("EN"),
+            locale: String::from("EN"),
             script: None,
         }
     }
 }
 
 impl EngineConfig {
-    pub fn new<S, C>(language: S, script_path: C) -> Self where
+    pub fn new<S, C>(locale: S, script_path: C) -> Self where
         S: Into<String>,
         C: Into<Option<String>>,
     {
         EngineConfig {
-            language: language.into(),
+            locale: locale.into(),
             script: script_path.into(),
         }
     }
@@ -54,8 +54,8 @@ impl EngineConfig {
         })
     }
 
-    pub fn language(&self) -> &str {
-        self.language.as_str()
+    pub fn locale(&self) -> &str {
+        self.locale.as_str()
     }
 
     pub fn script_path(&self) -> Option<&str> {
@@ -69,10 +69,10 @@ impl EngineConfig {
         }
     }
 
-    pub fn set_language<S>(&mut self, lang: S) where
+    pub fn set_locale<S>(&mut self, locale: S) where
         S: Into<String>
     {
-        self.language = lang.into();
+        self.locale = locale.into();
     }
 
     pub fn set_script_path<S>(&mut self, script_path: S) where

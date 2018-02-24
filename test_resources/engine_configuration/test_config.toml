@@ -1,4 +1,4 @@
 # Useful for the localization system.
-language = "EN"
+locale = "EN"
 # Useful for the scripting system.
 script = "path/to/file.lua"

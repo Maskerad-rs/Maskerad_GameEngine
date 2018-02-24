@@ -36,7 +36,8 @@ impl Clock {
     /// # Example
     ///
     /// ```rust
-    /// use maskerad_independence_layer::clock::Clock;
+    ///
+    /// # use maskerad_core::clock::Clock;
     ///
     /// let clock = Clock::new();
     /// assert!(!clock.is_paused());
@@ -140,7 +141,7 @@ mod clock_tests {
 
     #[test]
     fn clock_calculate_dt_second() {
-        let mut clock = Clock::new();
+        let clock = Clock::new();
         let old_time = Clock::current_time();
         thread::sleep(Duration::seconds(1).to_std().unwrap());
         let new_time = Clock::current_time();

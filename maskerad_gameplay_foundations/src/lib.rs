@@ -9,13 +9,3 @@ pub mod artificial_intelligence;
 pub mod event;
 pub mod scripting;
 pub mod game_loop;
-
-#[cfg(test)]
-mod maskerad_gameplay_foundations_test {
-    use super::*;
-
-    #[test]
-    fn test() {
-        assert_eq!(1+1, 2);
-    }
-}

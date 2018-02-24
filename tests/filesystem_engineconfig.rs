@@ -27,7 +27,7 @@ fn serialize_deserialize_engineconfig() {
         .expect(format!("{}::{} Could not create the engineconfig from the reader", file!(), line!()).as_str());
 
     assert!(engine_config.script_path().is_some());
-    assert_eq!(engine_config.language(), "EN");
+    assert_eq!(engine_config.locale(), "EN");
 
     //Serialization
     let ser_path = filesystem.construct_path_from_root(RootDir::WorkingDirectory, "test_resources/engine_configuration/test_ser_config.toml")
