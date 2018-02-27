@@ -10,45 +10,10 @@
 
  The localization system allows you to localize your game, without "too-much" hassle.
 
- A localization file is in the .CSV form, like this:
- ___________________________________________________
- |      | [lang1] |  [lang2] |  [lang3] |  [langN] |
- |______|_________|__________|__________|__________|
- | Key1 |_________|__________|__________|__________|
- | Key2 |_________|__________|__________|__________|
- | Key3 |_________|__________|__________|__________|
- | Key4 |_________|__________|__________|__________|
- | KeyN |_________|__________|__________|__________|
-
- A tool "CSV_to_JSON" will read the CSV file, and will create a JSON file
- for each language.
-
- Note that each [lang] id must be a locale id, like 'en' for english, or 'fr' for french.
- See this document from the Godot documentation: https://godot.readthedocs.io/en/latest/tutorials/misc/locales.html#doc-locales
-
- This tool will place all those file in {Working directory}/localization/{locale id}/localization.json.
- So, if your CSV file has translations for english, french and spanish, this tool will create the following hierarchy:
-
- WorkingDirectory
- |
- |-------localization
- |       |
- |       |
- |       |-------en
- |       |       |----localization.json
- |       |
- |       |-------fr
- |       |       |----localization.json
- |       |
- |       |-------es
- |       |       |----localization.json
-
  When the engine runs, it will load a configuration object (manually set, or from a toml file),
  which contain the locale used.
 
- To create a Localization structure, we pass it a locale as an str. This object, according to the locale,
- will check if the localization.json associated to this locale exists. If it exists, the json file is
- deserialized to a Rust structure holding an Hashmap<Key, String>.
+ Once we have the locale, we can find the localization file with this path: [CURRENT DIRECTORY]/localization/{locale}/localization.json
 
  The programmer can then use the Localization to get the correct string, without having to worry
  about the language. The code will not change.
@@ -65,7 +30,7 @@ pub struct Localization {
 }
 
 impl Localization {
-    pub fn new<R: Read>(reader: R) -> LocalizationResult<Self>
+    pub fn from_reader<R: Read>(reader: R) -> LocalizationResult<Self>
     {
         let manifest = Manifest::from_reader(reader)?;
 
@@ -82,9 +47,7 @@ impl Localization {
 }
 
 #[derive(Debug, Deserialize)]
-struct Manifest {
-    translation: HashMap<String, String>,
-}
+struct Manifest(HashMap<String, String>);
 
 impl Manifest {
     pub fn from_reader<R: Read>(reader: R) -> LocalizationResult<Self> {
@@ -96,7 +59,7 @@ impl Manifest {
     pub fn get<S>(&self, id: S) -> Option<&str> where
         S: AsRef<str>
     {
-        match self.translation.get(id.as_ref()) {
+        match self.0.get(id.as_ref()) {
             Some(string) => {
                 Some(string.as_str())
             },
