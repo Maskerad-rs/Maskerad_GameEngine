@@ -10,6 +10,9 @@ pub mod clock;
 pub mod engine_configuration;
 pub mod filesystem;
 pub mod localization;
+pub mod allocators;
+
+extern crate maskerad_memory_allocators;
 
 extern crate time;
 

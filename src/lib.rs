@@ -21,4 +21,5 @@ pub extern crate maskerad_debugging as debugging;
 
 pub extern crate maskerad_resource_management as resource_management;
 pub extern crate maskerad_core as core;
-pub extern crate maskerad_independence_layer as independence_layer;
+
+pub mod engine;
