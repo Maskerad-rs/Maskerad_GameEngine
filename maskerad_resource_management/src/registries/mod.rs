@@ -5,7 +5,6 @@
 // http://opensource.org/licenses/MIT>, at your option. This file may not be
 // copied, modified, or distributed except according to those terms.
 
-pub mod model_resource;
-pub mod image_resource;
-pub mod sound_resource;
-pub mod resource_errors;
+pub mod model_registry;
+pub mod sound_registry;
+pub mod image_registry;

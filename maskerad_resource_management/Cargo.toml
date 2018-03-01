@@ -10,3 +10,17 @@ keywords = ["game-engine"]
 categories = ["Game engines"]
 
 [dependencies]
+# The resource manager module sits on top of the core systems.
+maskerad_core = { path = "../maskerad_core" }
+
+#gltf resources.
+gltf = "~0.9"
+
+#image resources.
+imagefmt = "~4.0"
+
+#ogg resources.
+lewton = "~0.8"
+
+#logging support
+log = "~0.4"
